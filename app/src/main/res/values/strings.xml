@@ -3,4 +3,10 @@
     <string name="recepieName">name</string>
     <string name="noDataAlert">Error! No data fetched</string>
     <string name="exceptionAlert">Something went wrong</string>
+    <string name="title">Recepie title</string>
+    <string name="ingredients">ingredients</string>
+    <string name="steps">steps</string>
+    <string name="detail_error_message">Recepie Data not available</string>
+    <string name="shortDescription">shortDescription</string>
+    <string name="recepie_step">Recepie Step</string>
 </resources>
