@@ -24,6 +24,10 @@
             android:name=".DetailActivity">
         </activity>
 
+        <activity
+            android:name=".IngredientsActivity">
+        </activity>
+
     </application>
 
 </manifest>

@@ -2,33 +2,29 @@ package com.nagy.zsolt.bakingapp.util;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.nagy.zsolt.bakingapp.R;
 
-public class RecepieStepAdapter extends BaseAdapter {
+public class IngredientsAdapter extends BaseAdapter {
 
     private final Context mContext;
-    private final String[] recepieStepNames;
+    private final String[] ingredients;
 
-    public RecepieStepAdapter(Context context, String[] recepieStepNames) {
+    public IngredientsAdapter(Context context, String[] recepieStepNames) {
         this.mContext = context;
-        this.recepieStepNames = recepieStepNames;
+        this.ingredients = recepieStepNames;
     }
 
     @Override
     public int getCount() {
-        return recepieStepNames.length;
+        return ingredients.length;
     }
 
     @Override
@@ -54,7 +50,7 @@ public class RecepieStepAdapter extends BaseAdapter {
 
         final TextView textView = (TextView) convertView.findViewById(R.id.tvTitle2);
 
-        textView.setText(recepieStepNames[position]);
+        textView.setText(ingredients[position]);
         return convertView;
     }
 }

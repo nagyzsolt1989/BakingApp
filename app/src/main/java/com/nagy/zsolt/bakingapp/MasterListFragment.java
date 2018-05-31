@@ -80,6 +80,7 @@ public class MasterListFragment extends Fragment {
                         recepieIngredients = obj.getJSONArray(getString(R.string.ingredients));
                         recepieSteps = obj.getJSONArray(getString(R.string.steps));
                         System.out.println(recepieNames[i]);
+
                     }
 
                     RecepieAdapter recepieAdapter = new RecepieAdapter(getContext(), recepieNames);

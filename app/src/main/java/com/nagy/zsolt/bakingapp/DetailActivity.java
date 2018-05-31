@@ -3,6 +3,8 @@ package com.nagy.zsolt.bakingapp;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -21,7 +23,7 @@ public class DetailActivity extends AppCompatActivity {
     private static final int DEFAULT_POSITION = -1;
     public static final String INGREDIENTS_JSONARRAY = "ingredients_jsonarray";
     public static final String STEPS_JSONARRAY = "steps_jsonarray";
-    String[] stepNames;
+    private String[] stepNames, ingredients;
     ListView recepieStepListView;
 
 
@@ -45,10 +47,16 @@ public class DetailActivity extends AppCompatActivity {
             return;
         }
 
-        String recepieIngredients = intent.getStringExtra(INGREDIENTS_JSONARRAY);
+        final String recepieIngredients = intent.getStringExtra(INGREDIENTS_JSONARRAY);
         String recepieSteps = intent.getStringExtra(STEPS_JSONARRAY);
 
-        System.out.println("Batman" + recepieSteps);
+        JSONArray ingredientsJSONArray = null;
+        try {
+            ingredientsJSONArray = new JSONArray(recepieIngredients);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         JSONArray stepsJSONArray = null;
         try {
             stepsJSONArray = new JSONArray(recepieSteps);
@@ -56,7 +64,9 @@ public class DetailActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        System.out.println("Robin" + stepsJSONArray);
+        ingredients = new String[ingredientsJSONArray.length()];
+
+        System.out.println(recepieIngredients);
 
         stepNames = new String[stepsJSONArray.length()+1];
         stepNames[0] = "Ingredients";
@@ -64,11 +74,25 @@ public class DetailActivity extends AppCompatActivity {
         for (int i = 0; i < stepsJSONArray.length(); i++) {
             JSONObject obj = stepsJSONArray.optJSONObject(i);
             stepNames[i+1] = obj.optString(getString(R.string.shortDescription));
-            System.out.println(stepNames[i]);
+//            System.out.println(stepNames[i]);
         }
 
         RecepieStepAdapter recepieAdapter = new RecepieStepAdapter(getApplicationContext(), stepNames);
         recepieStepListView.setAdapter(recepieAdapter);
+
+        recepieStepListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                if (position == 0) showIngredientsDetails(position, recepieIngredients);
+            }
+        });
+    }
+
+    private void showIngredientsDetails(int position, String recepieIngredients) {
+        Intent intent = new Intent(getApplicationContext(), IngredientsActivity.class);
+        intent.putExtra(IngredientsActivity.EXTRA_POSITION, position);
+        intent.putExtra(IngredientsActivity.INGREDIENTS_JSONARRAY, recepieIngredients);
+        startActivity(intent);
     }
 
     private void closeOnError() {
