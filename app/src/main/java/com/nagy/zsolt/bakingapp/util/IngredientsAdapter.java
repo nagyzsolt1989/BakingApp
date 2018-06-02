@@ -15,11 +15,13 @@ import com.nagy.zsolt.bakingapp.R;
 public class IngredientsAdapter extends BaseAdapter {
 
     private final Context mContext;
-    private final String[] ingredients;
+    private final String[] ingredients, quantities, measure;
 
-    public IngredientsAdapter(Context context, String[] recepieStepNames) {
+    public IngredientsAdapter(Context context, String[] ingredients, String[] quantities, String[] measure) {
         this.mContext = context;
-        this.ingredients = recepieStepNames;
+        this.ingredients = ingredients;
+        this.quantities = quantities;
+        this.measure = measure;
     }
 
     @Override
@@ -45,12 +47,17 @@ public class IngredientsAdapter extends BaseAdapter {
 
         if (convertView == null) {
             final LayoutInflater layoutInflater = LayoutInflater.from(mContext);
-            convertView = layoutInflater.inflate(R.layout.step_list_item, null);
+            convertView = layoutInflater.inflate(R.layout.list_item_ingredient, null);
         }
 
-        final TextView textView = (TextView) convertView.findViewById(R.id.tvTitle2);
+        final TextView tvIngredients = (TextView) convertView.findViewById(R.id.tvTitle3);
+        final TextView tvQuantities = (TextView) convertView.findViewById(R.id.quantityValue);
+        final TextView tvMeasure = (TextView) convertView.findViewById(R.id.measureValue);
 
-        textView.setText(ingredients[position]);
+        tvIngredients.setText(ingredients[position]);
+        tvQuantities.setText(quantities[position]);
+        tvMeasure.setText(measure[position]);
+
         return convertView;
     }
 }

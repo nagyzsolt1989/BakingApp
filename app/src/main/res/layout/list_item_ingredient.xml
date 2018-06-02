@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/darker_gray">
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="10dp"
+        card_view:cardCornerRadius="7dp"
+        card_view:cardElevation="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                tools:paddingBottom="16dp">
+
+                <TextView
+                    android:id="@+id/tvTitle3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
+                    android:gravity="center_horizontal"
+                    android:padding="16dp"
+                    android:text="@string/Ingredient"
+                    android:textColor="#616161"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    card_view:layout_constraintEnd_toEndOf="parent"
+                    card_view:layout_constraintStart_toStartOf="parent"/>
+
+                <TextView
+                    android:id="@+id/quantityLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:padding="8dp"
+                    android:text="@string/Quantity"
+                    android:textColor="#616161"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    card_view:layout_constraintEnd_toStartOf="@+id/quantityValue"
+                    card_view:layout_constraintHorizontal_bias="0.5"
+                    card_view:layout_constraintHorizontal_chainStyle="packed"
+                    card_view:layout_constraintStart_toStartOf="parent"
+                    card_view:layout_constraintTop_toBottomOf="@id/tvTitle3"/>
+
+                <TextView
+                    android:id="@+id/quantityValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:padding="8dp"
+                    android:text="@string/Measure"
+                    android:textColor="#616161"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    card_view:layout_constraintEnd_toEndOf="parent"
+                    card_view:layout_constraintHorizontal_bias="0.5"
+                    card_view:layout_constraintHorizontal_chainStyle="packed"
+                    card_view:layout_constraintStart_toEndOf="@+id/quantityLabel"
+                    card_view:layout_constraintTop_toBottomOf="@id/tvTitle3"/>
+
+                <TextView
+                    android:id="@+id/measureLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:padding="8dp"
+                    android:text="@string/Measure"
+                    android:textColor="#616161"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    card_view:layout_constraintEnd_toStartOf="@+id/measureValue"
+                    card_view:layout_constraintHorizontal_bias="0.5"
+                    card_view:layout_constraintHorizontal_chainStyle="packed"
+                    card_view:layout_constraintStart_toStartOf="parent"
+                    card_view:layout_constraintTop_toBottomOf="@id/quantityLabel"/>
+
+                <TextView
+                    android:id="@+id/measureValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:gravity="center_horizontal"
+                    android:padding="8dp"
+                    android:text="@string/Measure"
+                    android:textColor="#616161"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    card_view:layout_constraintEnd_toEndOf="parent"
+                    card_view:layout_constraintHorizontal_bias="0.5"
+                    card_view:layout_constraintStart_toEndOf="@+id/measureLabel"
+                    card_view:layout_constraintTop_toBottomOf="@id/quantityValue"/>
+
+
+            </android.support.constraint.ConstraintLayout>
+
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+</LinearLayout>

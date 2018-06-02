@@ -9,4 +9,7 @@
     <string name="detail_error_message">Recepie Data not available</string>
     <string name="shortDescription">shortDescription</string>
     <string name="recepie_step">Recepie Step</string>
+    <string name="Ingredient">Ingredient</string>
+    <string name="Quantity">Quantity:</string>
+    <string name="Measure">Measure:</string>
 </resources>

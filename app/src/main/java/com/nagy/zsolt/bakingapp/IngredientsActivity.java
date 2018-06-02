@@ -21,14 +21,14 @@ public class IngredientsActivity extends AppCompatActivity {
     public static final String EXTRA_POSITION = "extra_position";
     private static final int DEFAULT_POSITION = -1;
     public static final String INGREDIENTS_JSONARRAY = "ingredients_jsonarray";
-    String[] ingredients;
+    String[] ingredients, quantities, measure;
     ListView ingredientsListView;
     Context mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_detail);
+        setContentView(R.layout.activity_ingredients);
         ButterKnife.bind(this);
 
         ingredientsListView = findViewById(R.id.ingredientsList);
@@ -56,13 +56,17 @@ public class IngredientsActivity extends AppCompatActivity {
         }
 
         ingredients = new String[ingredientsJSONArray.length()];
+        quantities = new String[ingredientsJSONArray.length()];
+        measure = new String[ingredientsJSONArray.length()];
 
         for (int i = 0; i < ingredientsJSONArray.length(); i++) {
-            ingredients[i] = ingredientsJSONArray.optJSONObject(i).toString();
+            ingredients[i] = ingredientsJSONArray.optJSONObject(i).optString("ingredient");
+            quantities[i] = ingredientsJSONArray.optJSONObject(i).optString("quantity");
+            measure[i] = ingredientsJSONArray.optJSONObject(i).optString("measure");
             System.out.println(ingredients[i]);
         }
 
-        IngredientsAdapter ingredientsAdapter = new IngredientsAdapter(getApplicationContext(), ingredients);
+        IngredientsAdapter ingredientsAdapter = new IngredientsAdapter(getApplicationContext(), ingredients, quantities, measure);
         ingredientsListView.setAdapter(ingredientsAdapter);
     }
 

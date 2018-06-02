@@ -2,16 +2,12 @@ package com.nagy.zsolt.bakingapp.util;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.nagy.zsolt.bakingapp.R;
@@ -49,7 +45,7 @@ public class RecepieStepAdapter extends BaseAdapter {
 
         if (convertView == null) {
             final LayoutInflater layoutInflater = LayoutInflater.from(mContext);
-            convertView = layoutInflater.inflate(R.layout.step_list_item, null);
+            convertView = layoutInflater.inflate(R.layout.list_item_step, null);
         }
 
         final TextView textView = (TextView) convertView.findViewById(R.id.tvTitle2);
