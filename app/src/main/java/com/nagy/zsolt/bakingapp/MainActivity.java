@@ -1,6 +1,7 @@
 package com.nagy.zsolt.bakingapp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,10 +23,97 @@ import butterknife.BindView;
 
 public class MainActivity extends AppCompatActivity {
 
+    JSONArray recepiesJsonArray;
+    JSONArray recepieIngredients;
+    JSONArray recepieSteps;
+    String[] recepieNames;
+    ListView mRecepieListView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mRecepieListView = (ListView) findViewById(R.id.recepieList);
+
+        getRecepies();
     }
 
+    public void getRecepies() {
+
+        try {
+            //Create Instance of GETAPIRequest and call it's
+            //request() method
+            String URL = "https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json";
+            GETAPIRequest getapiRequest = new GETAPIRequest();
+            getapiRequest.request(this, fetchGetResultListener, URL);
+//            Toast.makeText(getContext(), "GET API called", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    //Implementing interfaces of FetchDataListener for GET api request
+    FetchDataListener fetchGetResultListener = new FetchDataListener() {
+        @Override
+        public void onFetchComplete(JSONArray data) {
+            //Fetch Complete. Now stop progress bar  or loader
+            //you started in onFetchStart
+            RequestQueueService.cancelProgressDialog();
+            try {
+                //Check result sent by our GETAPIRequest class
+                if (data != null) {
+                    recepiesJsonArray = data;
+                    recepieNames = new String[recepiesJsonArray.length()];
+                    for (int i = 0; i < recepiesJsonArray.length(); i++) {
+                        JSONObject obj = recepiesJsonArray.getJSONObject(i);
+                        recepieNames[i] = obj.optString(getString(R.string.recepieName));
+                        recepieIngredients = obj.getJSONArray(getString(R.string.ingredients));
+                        recepieSteps = obj.getJSONArray(getString(R.string.steps));
+                        System.out.println(recepieNames[i]);
+
+                    }
+
+                    RecepieAdapter recepieAdapter = new RecepieAdapter(getApplicationContext(), recepieNames);
+                    mRecepieListView.setAdapter(recepieAdapter);
+                    mRecepieListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                            showRecepieDetails(position);
+                        }
+                    });
+
+                } else {
+                    RequestQueueService.showAlert(getString(R.string.noDataAlert), (FragmentActivity) getApplicationContext());
+                }
+            } catch (
+                    Exception e) {
+                RequestQueueService.showAlert(getString(R.string.exceptionAlert), (FragmentActivity) getApplicationContext());
+                e.printStackTrace();
+            }
+
+        }
+
+        @Override
+        public void onFetchFailure(String msg) {
+            RequestQueueService.cancelProgressDialog();
+            //Show if any error message is there called from GETAPIRequest class
+            RequestQueueService.showAlert(msg, (FragmentActivity) getApplicationContext());
+        }
+
+        @Override
+        public void onFetchStart() {
+            //Start showing progressbar or any loader you have
+            RequestQueueService.showProgressDialog(MainActivity.this);
+        }
+    };
+
+    private void showRecepieDetails(int position) {
+        Intent intent = new Intent(getApplicationContext(), DetailActivity.class);
+        intent.putExtra(DetailActivity.EXTRA_POSITION, position);
+        intent.putExtra(DetailActivity.INGREDIENTS_JSONARRAY, recepieIngredients.toString());
+        intent.putExtra(DetailActivity.STEPS_JSONARRAY, recepieSteps.toString());
+        startActivity(intent);
+//        getActivity().overridePendingTransition(R.anim.slide_from_right, R.anim.fade_out);
+    }
 }

@@ -12,4 +12,5 @@
     <string name="Ingredient">Ingredient</string>
     <string name="Quantity">Quantity:</string>
     <string name="Measure">Measure:</string>
+    <string name="title_activity_recepie_detail">RecepieDetailActivity</string>
 </resources>

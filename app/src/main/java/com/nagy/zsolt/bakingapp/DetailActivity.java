@@ -2,9 +2,12 @@ package com.nagy.zsolt.bakingapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -17,7 +20,7 @@ import org.json.JSONObject;
 
 import butterknife.ButterKnife;
 
-public class DetailActivity extends AppCompatActivity {
+public class DetailActivity extends AppCompatActivity implements MasterListFragment.OnStepClickListener{
 
     public static final String EXTRA_POSITION = "extra_position";
     private static final int DEFAULT_POSITION = -1;
@@ -25,6 +28,7 @@ public class DetailActivity extends AppCompatActivity {
     public static final String STEPS_JSONARRAY = "steps_jsonarray";
     private String[] stepNames, ingredients;
     ListView recepieStepListView;
+    private boolean mTwoPane;
 
 
     @Override
@@ -32,6 +36,42 @@ public class DetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
         ButterKnife.bind(this);
+
+        if (findViewById(R.id.recepie_step_details_linear_layout) != null) {
+            mTwoPane = true;
+
+            if (savedInstanceState == null) {
+
+                ListView listView = (ListView) findViewById(R.id.recepieList);
+                FragmentManager fragmentManager = getSupportFragmentManager();
+
+                RecepieStepFragment recepieStepFragment = new RecepieStepFragment();
+                fragmentManager.beginTransaction()
+                        .add(R.id.step_detail_container, recepieStepFragment)
+                        .commit();
+
+//                BodyPartFragment headFragment = new BodyPartFragment();
+//                fragmentManager.beginTransaction()
+//                        .add(R.id.head_container, headFragment)
+//                        .commit();
+//
+//                // Create and display the body and leg BodyPartFragments
+//
+//                BodyPartFragment bodyFragment = new BodyPartFragment();
+//                bodyFragment.setImageIds(AndroidImageAssets.getBodies());
+//                fragmentManager.beginTransaction()
+//                        .add(R.id.body_container, bodyFragment)
+//                        .commit();
+//
+//                BodyPartFragment legFragment = new BodyPartFragment();
+//                legFragment.setImageIds(AndroidImageAssets.getLegs());
+//                fragmentManager.beginTransaction()
+//                        .add(R.id.leg_container, legFragment)
+//                        .commit();
+            }
+        } else {
+            mTwoPane = false;
+        }
 
         recepieStepListView = findViewById(R.id.recepieStepList);
 
@@ -48,7 +88,7 @@ public class DetailActivity extends AppCompatActivity {
         }
 
         final String recepieIngredients = intent.getStringExtra(INGREDIENTS_JSONARRAY);
-        String recepieSteps = intent.getStringExtra(STEPS_JSONARRAY);
+        final String recepieSteps = intent.getStringExtra(STEPS_JSONARRAY);
 
         JSONArray ingredientsJSONArray = null;
         try {
@@ -64,28 +104,53 @@ public class DetailActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        ingredients = new String[ingredientsJSONArray.length()];
-
-        System.out.println(recepieIngredients);
-
-        stepNames = new String[stepsJSONArray.length()+1];
+        stepNames = new String[stepsJSONArray.length() + 1];
         stepNames[0] = "Ingredients";
 
         for (int i = 0; i < stepsJSONArray.length(); i++) {
             JSONObject obj = stepsJSONArray.optJSONObject(i);
-            stepNames[i+1] = obj.optString(getString(R.string.shortDescription));
+            stepNames[i + 1] = obj.optString(getString(R.string.shortDescription));
 //            System.out.println(stepNames[i]);
         }
 
         RecepieStepAdapter recepieAdapter = new RecepieStepAdapter(getApplicationContext(), stepNames);
         recepieStepListView.setAdapter(recepieAdapter);
 
-        recepieStepListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                if (position == 0) showIngredientsDetails(position, recepieIngredients);
-            }
-        });
+//        recepieStepListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+//                // Trigger the callback method and pass in the position that was clicked
+//                mCallback.onStepSelected(position, rece);
+//            }
+//        });
+//        recepieStepListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+//                if (position == 0) showIngredientsDetails(position, recepieIngredients);
+//                else showRecepieStepDetails(position, recepieSteps);
+//            }
+//        });
+    }
+
+    public void onStepSelected(int position, String recepieSteps) {
+        // Create a Toast that displays the position that was clicked
+        Toast.makeText(this, "Position clicked = " + position, Toast.LENGTH_SHORT).show();
+
+        if (mTwoPane) {
+            RecepieStepFragment newFragment = new RecepieStepFragment();
+
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.step_detail_container, newFragment)
+                    .commit();
+        } else {
+        }
+
+        // Attach the Bundle to an intent
+        final Intent intent = new Intent(this, RecepieStepFragment.class);
+        intent.putExtra(RecepieDetailActivity.EXTRA_POSITION, position);
+        intent.putExtra(RecepieDetailActivity.STEPS_JSONARRAY, recepieSteps);
+        startActivity(intent);
+
     }
 
     private void showIngredientsDetails(int position, String recepieIngredients) {

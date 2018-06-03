@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.nagy.zsolt.bakingapp">
 
-    <!--Internet permission-->
+    <!-- Internet permission -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
@@ -19,15 +19,15 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".DetailActivity">
+        <activity android:name=".DetailActivity">
         </activity>
-
-        <activity
-            android:name=".IngredientsActivity">
+        <activity android:name=".IngredientsActivity">
         </activity>
-
+        <activity
+            android:name=".RecepieDetailActivity"
+            android:label="@string/title_activity_recepie_detail"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
     </application>
 
 </manifest>
