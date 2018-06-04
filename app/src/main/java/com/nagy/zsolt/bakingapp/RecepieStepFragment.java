@@ -7,22 +7,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class RecepieStepFragment extends Fragment {
 
-    // Final Strings to store state information about the list of images and list index
-    public static final String IMAGE_ID_LIST = "image_ids";
-    public static final String LIST_INDEX = "list_index";
-
-    // Tag for logging
-    private static final String TAG = "BodyPartFragment";
-
-    // Variables to store a list of image resources and the index of the image that this fragment displays
-    private List<Integer> mImageIds;
-    private int mListIndex;
+    String recepieStepTitle, recepieStepDescription;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the fragment
@@ -30,22 +22,29 @@ public class RecepieStepFragment extends Fragment {
     public RecepieStepFragment() {
     }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            recepieStepTitle = getArguments().getString("StepTitle");
+            recepieStepDescription = getArguments().getString("StepDescription");
+        }
+    }
+
     /**
      * Inflates the fragment layout file and sets the correct resource for the image to display
      */
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        // Load the saved state (the list of images and list index) if there is one
-        if (savedInstanceState != null) {
-            mImageIds = savedInstanceState.getIntegerArrayList(IMAGE_ID_LIST);
-            mListIndex = savedInstanceState.getInt(LIST_INDEX);
-        }
-
-        // Inflate the Android-Me fragment layout
         View rootView = inflater.inflate(R.layout.content_recepie_detail, container, false);
 
-//            // Get a reference to the ImageView in the fragment layout
+        final TextView recepieStepTitleTV = (TextView) rootView.findViewById(R.id.recepieStepTitle);
+        final TextView recepieStepDescriptionTV = (TextView) rootView.findViewById(R.id.recepieStepDescription);
+
+        recepieStepTitleTV.setText(recepieStepTitle);
+        recepieStepDescriptionTV.setText(recepieStepDescription);
 //            final ImageView imageView = (ImageView) rootView.findViewById(R.id.body_part_image_view);
 //
 //            // If a list of image ids exists, set the image resource to the correct item in that list
@@ -81,22 +80,22 @@ public class RecepieStepFragment extends Fragment {
     // Setter methods for keeping track of the list images this fragment can display and which image
     // in the list is currently being displayed
 
-    public void setImageIds(List<Integer> imageIds) {
-        mImageIds = imageIds;
-    }
-
-    public void setListIndex(int index) {
-        mListIndex = index;
-    }
-
-    /**
-     * Save the current state of this fragment
-     */
-    @Override
-    public void onSaveInstanceState(Bundle currentState) {
-        currentState.putIntegerArrayList(IMAGE_ID_LIST, (ArrayList<Integer>) mImageIds);
-        currentState.putInt(LIST_INDEX, mListIndex);
-    }
+//    public void setImageIds(List<Integer> imageIds) {
+//        mImageIds = imageIds;
+//    }
+//
+//    public void setListIndex(int index) {
+//        mListIndex = index;
+//    }
+//
+//    /**
+//     * Save the current state of this fragment
+//     */
+//    @Override
+//    public void onSaveInstanceState(Bundle currentState) {
+//        currentState.putIntegerArrayList(IMAGE_ID_LIST, (ArrayList<Integer>) mImageIds);
+//        currentState.putInt(LIST_INDEX, mListIndex);
+//    }
 
 
 }

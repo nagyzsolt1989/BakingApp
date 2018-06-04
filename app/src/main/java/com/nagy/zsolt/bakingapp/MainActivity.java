@@ -24,9 +24,7 @@ import butterknife.BindView;
 public class MainActivity extends AppCompatActivity {
 
     JSONArray recepiesJsonArray;
-    JSONArray recepieIngredients;
-    JSONArray recepieSteps;
-    String[] recepieNames;
+    static String[] recepieNames, recepieSteps, recepieIngredients;
     ListView mRecepieListView;
 
     @Override
@@ -44,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             //Create Instance of GETAPIRequest and call it's
             //request() method
-            String URL = "https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json";
+            String URL = getString(R.string.RECEPIE_URL);
             GETAPIRequest getapiRequest = new GETAPIRequest();
             getapiRequest.request(this, fetchGetResultListener, URL);
 //            Toast.makeText(getContext(), "GET API called", Toast.LENGTH_SHORT).show();
@@ -65,13 +63,17 @@ public class MainActivity extends AppCompatActivity {
                 if (data != null) {
                     recepiesJsonArray = data;
                     recepieNames = new String[recepiesJsonArray.length()];
+                    recepieSteps = new String[recepiesJsonArray.length()];
+                    recepieIngredients = new String[recepiesJsonArray.length()];
                     for (int i = 0; i < recepiesJsonArray.length(); i++) {
                         JSONObject obj = recepiesJsonArray.getJSONObject(i);
                         recepieNames[i] = obj.optString(getString(R.string.recepieName));
-                        recepieIngredients = obj.getJSONArray(getString(R.string.ingredients));
-                        recepieSteps = obj.getJSONArray(getString(R.string.steps));
-                        System.out.println(recepieNames[i]);
+                        recepieSteps[i] = obj.optString(getString(R.string.steps));
+                        recepieIngredients[i] = obj.optString(getString(R.string.ingredients));
+                    }
 
+                    for (int k = 0; k < recepieIngredients.length; k++) {
+                        System.out.println("Batman" + recepieIngredients[k]);
                     }
 
                     RecepieAdapter recepieAdapter = new RecepieAdapter(getApplicationContext(), recepieNames);
@@ -111,9 +113,17 @@ public class MainActivity extends AppCompatActivity {
     private void showRecepieDetails(int position) {
         Intent intent = new Intent(getApplicationContext(), DetailActivity.class);
         intent.putExtra(DetailActivity.EXTRA_POSITION, position);
-        intent.putExtra(DetailActivity.INGREDIENTS_JSONARRAY, recepieIngredients.toString());
-        intent.putExtra(DetailActivity.STEPS_JSONARRAY, recepieSteps.toString());
+        intent.putExtra(DetailActivity.INGREDIENTS_JSONARRAY, recepieIngredients[position].toString());
+        intent.putExtra(DetailActivity.STEPS_JSONARRAY, recepieSteps[position].toString());
         startActivity(intent);
 //        getActivity().overridePendingTransition(R.anim.slide_from_right, R.anim.fade_out);
+    }
+
+    public static String getRecepieStepNames(int position) {
+        return recepieSteps[position];
+    }
+
+    public static String[] getRecepieNames() {
+        return recepieNames;
     }
 }

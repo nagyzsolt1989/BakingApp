@@ -47,7 +47,8 @@ public class IngredientsActivity extends AppCompatActivity {
 
         String recepieIngredients = intent.getStringExtra(INGREDIENTS_JSONARRAY);
 
-        System.out.println("IngredientsActivity" + recepieIngredients);
+        System.out.println("Vöröshagyma" + recepieIngredients);
+
         JSONArray ingredientsJSONArray = null;
         try {
             ingredientsJSONArray = new JSONArray(recepieIngredients);

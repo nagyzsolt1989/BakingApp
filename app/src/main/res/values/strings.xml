@@ -4,7 +4,6 @@
     <string name="noDataAlert">Error! No data fetched</string>
     <string name="exceptionAlert">Something went wrong</string>
     <string name="title">Recepie title</string>
-    <string name="ingredients">ingredients</string>
     <string name="steps">steps</string>
     <string name="detail_error_message">Recepie Data not available</string>
     <string name="shortDescription">shortDescription</string>
@@ -13,4 +12,6 @@
     <string name="Quantity">Quantity:</string>
     <string name="Measure">Measure:</string>
     <string name="title_activity_recepie_detail">RecepieDetailActivity</string>
+    <string name="ingredients">ingredients</string>
+    <string name="RECEPIE_URL">https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json</string>
 </resources>

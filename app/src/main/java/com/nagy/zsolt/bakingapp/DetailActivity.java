@@ -3,31 +3,27 @@ package com.nagy.zsolt.bakingapp;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.GridView;
-import android.widget.ListView;
 import android.widget.Toast;
-
-import com.nagy.zsolt.bakingapp.util.RecepieAdapter;
-import com.nagy.zsolt.bakingapp.util.RecepieStepAdapter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import butterknife.ButterKnife;
 
-public class DetailActivity extends AppCompatActivity implements MasterListFragment.OnStepClickListener{
+public class DetailActivity extends AppCompatActivity implements RecepieStepListFragment.OnStepClickListener, AdapterView.OnItemClickListener{
 
     public static final String EXTRA_POSITION = "extra_position";
     private static final int DEFAULT_POSITION = -1;
     public static final String INGREDIENTS_JSONARRAY = "ingredients_jsonarray";
     public static final String STEPS_JSONARRAY = "steps_jsonarray";
-    private String[] stepNames, ingredients;
-    ListView recepieStepListView;
+    public static String recepieIngredients, recepieSteps;
+    JSONArray stepJSONArray;
+    String[] recepieStepTitle, recepieStepDescription;
+    public static int position;
     private boolean mTwoPane;
 
 
@@ -37,119 +33,93 @@ public class DetailActivity extends AppCompatActivity implements MasterListFragm
         setContentView(R.layout.activity_detail);
         ButterKnife.bind(this);
 
-        if (findViewById(R.id.recepie_step_details_linear_layout) != null) {
-            mTwoPane = true;
-
-            if (savedInstanceState == null) {
-
-                ListView listView = (ListView) findViewById(R.id.recepieList);
-                FragmentManager fragmentManager = getSupportFragmentManager();
-
-                RecepieStepFragment recepieStepFragment = new RecepieStepFragment();
-                fragmentManager.beginTransaction()
-                        .add(R.id.step_detail_container, recepieStepFragment)
-                        .commit();
-
-//                BodyPartFragment headFragment = new BodyPartFragment();
-//                fragmentManager.beginTransaction()
-//                        .add(R.id.head_container, headFragment)
-//                        .commit();
-//
-//                // Create and display the body and leg BodyPartFragments
-//
-//                BodyPartFragment bodyFragment = new BodyPartFragment();
-//                bodyFragment.setImageIds(AndroidImageAssets.getBodies());
-//                fragmentManager.beginTransaction()
-//                        .add(R.id.body_container, bodyFragment)
-//                        .commit();
-//
-//                BodyPartFragment legFragment = new BodyPartFragment();
-//                legFragment.setImageIds(AndroidImageAssets.getLegs());
-//                fragmentManager.beginTransaction()
-//                        .add(R.id.leg_container, legFragment)
-//                        .commit();
-            }
-        } else {
-            mTwoPane = false;
-        }
-
-        recepieStepListView = findViewById(R.id.recepieStepList);
-
         Intent intent = getIntent();
         if (intent == null) {
             closeOnError();
         }
 
-        int position = intent.getIntExtra(EXTRA_POSITION, DEFAULT_POSITION);
+        position = intent.getIntExtra(EXTRA_POSITION, DEFAULT_POSITION);
         if (position == DEFAULT_POSITION) {
             // EXTRA_POSITION not found in intent
             closeOnError();
             return;
         }
 
-        final String recepieIngredients = intent.getStringExtra(INGREDIENTS_JSONARRAY);
-        final String recepieSteps = intent.getStringExtra(STEPS_JSONARRAY);
+        recepieIngredients  = intent.getStringExtra(INGREDIENTS_JSONARRAY);
+        recepieSteps  = intent.getStringExtra(INGREDIENTS_JSONARRAY);
 
-        JSONArray ingredientsJSONArray = null;
+        JSONArray stepJSONArray = null;
         try {
-            ingredientsJSONArray = new JSONArray(recepieIngredients);
+            stepJSONArray = new JSONArray(recepieSteps);
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        JSONArray stepsJSONArray = null;
-        try {
-            stepsJSONArray = new JSONArray(recepieSteps);
-        } catch (JSONException e) {
-            e.printStackTrace();
+        recepieStepTitle = new String[stepJSONArray.length()];
+        recepieStepDescription = new String[stepJSONArray.length()];
+
+        for (int i = 0; i < stepJSONArray.length(); i++) {
+            recepieStepTitle[i] = stepJSONArray.optJSONObject(i).optString("shortDescription");
+            recepieStepDescription[i] = stepJSONArray.optJSONObject(i).optString("description");
         }
 
-        stepNames = new String[stepsJSONArray.length() + 1];
-        stepNames[0] = "Ingredients";
+        if (findViewById(R.id.recepie_step_details_linear_layout) != null) {
+            mTwoPane = true;
 
-        for (int i = 0; i < stepsJSONArray.length(); i++) {
-            JSONObject obj = stepsJSONArray.optJSONObject(i);
-            stepNames[i + 1] = obj.optString(getString(R.string.shortDescription));
-//            System.out.println(stepNames[i]);
+            if (savedInstanceState == null) {
+
+//                ListView listView = (ListView) findViewById(R.id.recepieList);
+                FragmentManager fragmentManager = getSupportFragmentManager();
+
+                Bundle bundle = new Bundle();
+                bundle.putInt("Position", position);
+
+                RecepieStepListFragment recepieStepListFragment = new RecepieStepListFragment();
+                recepieStepListFragment.setArguments(bundle);
+                fragmentManager.beginTransaction()
+                        .add(R.id.step_list_container, recepieStepListFragment)
+                        .commit();
+
+                RecepieStepFragment recepieStepFragment = new RecepieStepFragment();
+                fragmentManager.beginTransaction()
+                        .add(R.id.step_detail_container, recepieStepFragment)
+                        .commit();
+            }
+        } else {
+            mTwoPane = false;
         }
-
-        RecepieStepAdapter recepieAdapter = new RecepieStepAdapter(getApplicationContext(), stepNames);
-        recepieStepListView.setAdapter(recepieAdapter);
-
-//        recepieStepListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-//                // Trigger the callback method and pass in the position that was clicked
-//                mCallback.onStepSelected(position, rece);
-//            }
-//        });
-//        recepieStepListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-//                if (position == 0) showIngredientsDetails(position, recepieIngredients);
-//                else showRecepieStepDetails(position, recepieSteps);
-//            }
-//        });
     }
 
-    public void onStepSelected(int position, String recepieSteps) {
+    public void onStepSelected(int stepPosition) {
         // Create a Toast that displays the position that was clicked
-        Toast.makeText(this, "Position clicked = " + position, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Position clicked = " + stepPosition, Toast.LENGTH_SHORT).show();
 
-        if (mTwoPane) {
-            RecepieStepFragment newFragment = new RecepieStepFragment();
 
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.step_detail_container, newFragment)
-                    .commit();
+        if (mTwoPane) { // single activity with list and detail
+            // Replace frame layout with correct detail fragment
+            if(stepPosition == 0){
+                showIngredientsDetails(DetailActivity.position, DetailActivity.recepieIngredients);
+            } else{
+                Bundle bundle = new Bundle();
+                bundle.putString("StepTitle", recepieStepTitle[stepPosition+1]);
+                bundle.putString("StepDescription", recepieStepDescription[stepPosition+1]);
+                RecepieStepFragment recepieStepFragment = new RecepieStepFragment();
+                recepieStepFragment.setArguments(bundle);
+                FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.replace(R.id.step_detail_container, recepieStepFragment);
+                fragmentTransaction.commit();
+            }
         } else {
+            if(stepPosition == 0){
+                showIngredientsDetails(DetailActivity.position, DetailActivity.recepieIngredients);
+            } else {
+                // separate activities
+                // launch detail activity using intent
+                Intent i = new Intent(getApplicationContext(), RecepieStepActivity.class);
+                i.putExtra("item", stepPosition);
+                startActivity(i);
+            }
         }
-
-        // Attach the Bundle to an intent
-        final Intent intent = new Intent(this, RecepieStepFragment.class);
-        intent.putExtra(RecepieDetailActivity.EXTRA_POSITION, position);
-        intent.putExtra(RecepieDetailActivity.STEPS_JSONARRAY, recepieSteps);
-        startActivity(intent);
 
     }
 
@@ -163,5 +133,10 @@ public class DetailActivity extends AppCompatActivity implements MasterListFragm
     private void closeOnError() {
         finish();
         Toast.makeText(this, R.string.detail_error_message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
     }
 }
