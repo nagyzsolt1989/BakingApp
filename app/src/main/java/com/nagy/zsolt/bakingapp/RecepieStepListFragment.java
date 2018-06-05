@@ -88,7 +88,6 @@ public class RecepieStepListFragment extends Fragment {
         for (int i = 0; i < stepsJSONArray.length(); i++) {
             JSONObject obj = stepsJSONArray.optJSONObject(i);
             recepieStepNames[i+1] = obj.optString("shortDescription");
-            System.out.println("Recepie Steps" + recepieStepNames[i]);
         }
 
         recepieStepListView = rootView.findViewById(R.id.recepieStepList);
@@ -99,7 +98,6 @@ public class RecepieStepListFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 // Trigger the callback method and pass in the position that was clicked
-                System.out.println("Was clicked" + position);
                 mCallback.onStepSelected(position);
             }
         });

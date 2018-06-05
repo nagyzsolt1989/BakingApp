@@ -57,7 +57,6 @@ public class RecepieDetailActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        System.out.println(recepieSteps);
 
         stepTitle = new String[stepsJSONArray.length()];
         stepDescription = new String[stepsJSONArray.length()];
@@ -68,9 +67,6 @@ public class RecepieDetailActivity extends AppCompatActivity {
             id[i] = obj.optString("id");
             stepTitle[i] = obj.optString(getString(R.string.shortDescription));
             stepDescription[i] = obj.optString("description");
-            System.out.println(id[i]);
-            System.out.println(stepTitle[i]);
-            System.out.println(stepDescription[i]);
         }
 
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);

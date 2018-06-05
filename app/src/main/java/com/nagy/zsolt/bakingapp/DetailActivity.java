@@ -22,7 +22,7 @@ public class DetailActivity extends AppCompatActivity implements RecepieStepList
     public static final String STEPS_JSONARRAY = "steps_jsonarray";
     public static String recepieIngredients, recepieSteps;
     JSONArray stepJSONArray;
-    String[] recepieStepTitle, recepieStepDescription;
+    String[] recepieStepTitle, recepieStepDescription, recepieStepVideoURI;
     public static int position;
     private boolean mTwoPane;
 
@@ -46,7 +46,9 @@ public class DetailActivity extends AppCompatActivity implements RecepieStepList
         }
 
         recepieIngredients  = intent.getStringExtra(INGREDIENTS_JSONARRAY);
-        recepieSteps  = intent.getStringExtra(INGREDIENTS_JSONARRAY);
+        recepieSteps  = intent.getStringExtra(STEPS_JSONARRAY);
+
+        System.out.println("recepieSteps" + recepieSteps);
 
         JSONArray stepJSONArray = null;
         try {
@@ -57,10 +59,18 @@ public class DetailActivity extends AppCompatActivity implements RecepieStepList
 
         recepieStepTitle = new String[stepJSONArray.length()];
         recepieStepDescription = new String[stepJSONArray.length()];
+        recepieStepVideoURI = new String[stepJSONArray.length()];
+
+        System.out.println("stespJSONarray" + stepJSONArray);
+
 
         for (int i = 0; i < stepJSONArray.length(); i++) {
             recepieStepTitle[i] = stepJSONArray.optJSONObject(i).optString("shortDescription");
             recepieStepDescription[i] = stepJSONArray.optJSONObject(i).optString("description");
+            recepieStepVideoURI[i] = stepJSONArray.optJSONObject(i).optString("videoURL");
+            System.out.println("Hulk" + recepieStepTitle[i]);
+            System.out.println("Smash" + recepieStepDescription[i]);
+            System.out.println("Loki" + recepieStepVideoURI[i]);
         }
 
         if (findViewById(R.id.recepie_step_details_linear_layout) != null) {
@@ -101,8 +111,10 @@ public class DetailActivity extends AppCompatActivity implements RecepieStepList
                 showIngredientsDetails(DetailActivity.position, DetailActivity.recepieIngredients);
             } else{
                 Bundle bundle = new Bundle();
-                bundle.putString("StepTitle", recepieStepTitle[stepPosition+1]);
-                bundle.putString("StepDescription", recepieStepDescription[stepPosition+1]);
+                bundle.putStringArray("StepTitle", recepieStepTitle);
+                bundle.putStringArray("StepDescription", recepieStepDescription);
+                bundle.putStringArray("StepVideoURI", recepieStepVideoURI);
+                bundle.putInt("StepPosition", stepPosition-1);
                 RecepieStepFragment recepieStepFragment = new RecepieStepFragment();
                 recepieStepFragment.setArguments(bundle);
                 FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();

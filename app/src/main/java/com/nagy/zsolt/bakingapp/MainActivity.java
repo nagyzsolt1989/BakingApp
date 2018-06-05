@@ -72,10 +72,6 @@ public class MainActivity extends AppCompatActivity {
                         recepieIngredients[i] = obj.optString(getString(R.string.ingredients));
                     }
 
-                    for (int k = 0; k < recepieIngredients.length; k++) {
-                        System.out.println("Batman" + recepieIngredients[k]);
-                    }
-
                     RecepieAdapter recepieAdapter = new RecepieAdapter(getApplicationContext(), recepieNames);
                     mRecepieListView.setAdapter(recepieAdapter);
                     mRecepieListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
