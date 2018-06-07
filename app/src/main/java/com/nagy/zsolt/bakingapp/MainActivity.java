@@ -2,6 +2,7 @@ package com.nagy.zsolt.bakingapp;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -24,8 +25,11 @@ import butterknife.BindView;
 public class MainActivity extends AppCompatActivity {
 
     JSONArray recepiesJsonArray;
-    static String[] recepieNames, recepieSteps, recepieIngredients;
+    public static String[] recepieNames, recepieSteps, recepieIngredients;
     ListView mRecepieListView;
+
+    public static final String SHARED_PREF_NAME = "RECEPIE";
+    public static final String RECEPIE_JSON_ARRAY = "RECEPIE_JSON_ARRAY";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +85,8 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
 
+                    saveToSharedPref(getApplicationContext(), data);
+
                 } else {
                     RequestQueueService.showAlert(getString(R.string.noDataAlert), (FragmentActivity) getApplicationContext());
                 }
@@ -113,6 +119,13 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra(DetailActivity.STEPS_JSONARRAY, recepieSteps[position].toString());
         startActivity(intent);
 //        getActivity().overridePendingTransition(R.anim.slide_from_right, R.anim.fade_out);
+    }
+
+    public static void saveToSharedPref(Context mContext, JSONArray data){
+        SharedPreferences mPrefs = mContext.getSharedPreferences(SHARED_PREF_NAME,Context.MODE_PRIVATE);
+        SharedPreferences.Editor prefsEditor = mPrefs.edit();
+        prefsEditor.putString(RECEPIE_JSON_ARRAY, data.toString());
+        prefsEditor.commit();
     }
 
     public static String getRecepieStepNames(int position) {
