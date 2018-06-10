@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -56,6 +57,7 @@ public class AppWidgetConfigureActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        Log.i("fdsd", "onCreate: HÁROM!!!");
         System.out.println("egy" + recepiesJsonArray);
 
         recepieNames = new String[recepiesJsonArray.length()];
@@ -66,12 +68,15 @@ public class AppWidgetConfigureActivity extends AppCompatActivity {
             recepieIngredients[i] = obj.optString(getString(R.string.ingredients));
         }
 
+        Log.i("fdsd", "onCreate: NÉGY!!!");
+
         mRecepieListView = (ListView) findViewById(R.id.appwidget_configure_listview);
 
         RecepieAdapter recepieAdapter = new RecepieAdapter(getApplicationContext(), recepieNames);
         mRecepieListView.setAdapter(recepieAdapter);
 
 
+        Log.i("fdsd", "onCreate: ÖT!!!");
         // Find the widget id from the intent.
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
@@ -80,22 +85,28 @@ public class AppWidgetConfigureActivity extends AppCompatActivity {
                     AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
         }
 
+        Log.i("fdsd", "onCreate: HAT!!!");
+
         // If this activity was started with an intent without an app widget ID, finish with an error.
         if (mAppWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
             finish();
             return;
         }
 
-        mRecepieListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Intent resultValue = new Intent();
-                resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
-                resultValue.putExtra(EXTRA_APPWIDGET_INGREDIENTS, recepieIngredients[position].toString());
-                setResult(RESULT_OK, resultValue);
-                finish();
-            }
-        });
+//        mRecepieListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+////                AppWidget.sendRefreshBroadcast(mContext);
+//                for (int i = 0; i < recepieIngredients[position].length(); i++) {
+//                    System.out.println("Bubó" + recepieIngredients[position]);
+//                }
+//                Intent resultValue = new Intent();
+//                resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
+//                resultValue.putExtra(EXTRA_APPWIDGET_INGREDIENTS, recepieIngredients[position].toString());
+//                setResult(RESULT_OK, resultValue);
+//                finish();
+//            }
+//        });
 
     }
 }

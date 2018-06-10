@@ -2,12 +2,15 @@ package com.nagy.zsolt.bakingapp.widget;
 
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.widget.RemoteViews;
-import android.widget.Toast;
 
 import com.nagy.zsolt.bakingapp.R;
+
+import static com.android.volley.VolleyLog.TAG;
 
 /**
  * Implementation of App Widget functionality.
@@ -18,25 +21,23 @@ public class AppWidget extends AppWidgetProvider {
     public static final String EXTRA_APPWIDGET_INGREDIENTS = "EXTRA_APPWIDGET_INGREDIENTS";
     String recepIngredients;
 
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-                                int appWidgetId) {
-
-//        CharSequence widgetText = AppWidgetConfigureActivity.loadTitlePref(context, appWidgetId);
-        // Construct the RemoteViews object
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.app_widget);
-        views.setTextViewText(R.id.appwidget_text, "SON GOKU");
-
-        // Instruct the widget manager to update the widget
-        appWidgetManager.updateAppWidget(appWidgetId, views);
-    }
-
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         // There may be multiple widgets active, so update all of them
         for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId);
+            RemoteViews views = new RemoteViews(
+                    context.getPackageName(),
+                    R.layout.app_widget
+            );
+            Log.i(TAG, "onUpdate: EGY!!!");
+            Intent intent = new Intent(context, WidgetRemoteViewsService.class);
+            views.setRemoteAdapter(R.id.widget_listview, intent);
+            appWidgetManager.updateAppWidget(appWidgetId, views);
         }
+
+
     }
+
 
     @Override
     public void onDeleted(Context context, int[] appWidgetIds) {
@@ -56,37 +57,36 @@ public class AppWidget extends AppWidgetProvider {
         // Enter relevant functionality for when the last widget is disabled
     }
 
+    public static void sendRefreshBroadcast(Context context) {
+        Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        intent.setComponent(new ComponentName(context, AppWidget.class));
+        context.sendBroadcast(intent);
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.app_widget);
+        final String action = intent.getAction();
+        if (action.equals(AppWidgetManager.ACTION_APPWIDGET_UPDATE)) {
+            // refresh all your widgets
 
-        // Display which View is clicked
-        Toast.makeText(context,"onReceive: "+intent.getAction(), Toast.LENGTH_LONG).show();
+            Log.i(TAG, "onReceive: KETTŐ!!");
+            AppWidgetManager mgr = AppWidgetManager.getInstance(context);
+            ComponentName cn = new ComponentName(context, AppWidget.class);
+            mgr.notifyAppWidgetViewDataChanged(mgr.getAppWidgetIds(cn), R.id.widget_listview);
+        }
+        super.onReceive(context, intent);
 
-//        // Generate a random number
-//        Random rand = new Random();
-//        Integer randomNumber = rand.nextInt(25);
-//
-//            /*
-//                String getAction()
-//                Retrieve the general action to be performed, such as ACTION_VIEW.
-//            */
-//
-//        if (RED_CLICKED.equals(intent.getAction())) {
-//            // If the Red TextView clicked, then do that
-//            remoteViews.setTextViewText(R.id.tv_red, "" + randomNumber);
+
+//        final String action = intent.getAction();
+//        if (action.equals(AppWidgetManager.ACTION_APPWIDGET_UPDATE)) {
+//            // refresh all your widgets
+//            AppWidgetManager mgr = AppWidgetManager.getInstance(context);
+//            ComponentName cn = new ComponentName(context, AppWidget.class);
+//            mgr.notifyAppWidgetViewDataChanged(mgr.getAppWidgetIds(cn), R.id.widget_listview);
 //        }
-//
-//        if (GREEN_CLICKED.equals(intent.getAction())) {
-//            // If the Green TextView clicked, then do that
-//            remoteViews.setTextViewText(R.id.tv_green, "" + randomNumber);
-//        }
-//        appWidgetManager.updateAppWidget(watchWidget, remoteViews);
-        recepIngredients = intent.getStringExtra(EXTRA_APPWIDGET_INGREDIENTS);
+//        super.onReceive(context, intent);
 
-        System.out.println("Végre" + recepIngredients);
     }
 }
 
