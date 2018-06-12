@@ -30,10 +30,7 @@ public class AppWidgetConfigureActivity extends AppCompatActivity {
 
     public static final String SHARED_PREF_NAME = "RECEPIE";
     public static final String RECEPIE_JSON_ARRAY = "RECEPIE_JSON_ARRAY";
-    public static final String EXTRA_APPWIDGET_INGREDIENTS = "EXTRA_APPWIDGET_INGREDIENTS";
-
-
-    int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
+    public int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
     JSONArray recepiesJsonArray;
     String[] recepieNames, recepieIngredients;
     ListView mRecepieListView;
@@ -57,9 +54,6 @@ public class AppWidgetConfigureActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        Log.i("fdsd", "onCreate: HÁROM!!!");
-        System.out.println("egy" + recepiesJsonArray);
-
         recepieNames = new String[recepiesJsonArray.length()];
         recepieIngredients = new String[recepiesJsonArray.length()];
         for (int i = 0; i < recepiesJsonArray.length(); i++) {
@@ -68,15 +62,11 @@ public class AppWidgetConfigureActivity extends AppCompatActivity {
             recepieIngredients[i] = obj.optString(getString(R.string.ingredients));
         }
 
-        Log.i("fdsd", "onCreate: NÉGY!!!");
-
         mRecepieListView = (ListView) findViewById(R.id.appwidget_configure_listview);
 
         RecepieAdapter recepieAdapter = new RecepieAdapter(getApplicationContext(), recepieNames);
         mRecepieListView.setAdapter(recepieAdapter);
 
-
-        Log.i("fdsd", "onCreate: ÖT!!!");
         // Find the widget id from the intent.
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
@@ -85,28 +75,35 @@ public class AppWidgetConfigureActivity extends AppCompatActivity {
                     AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
         }
 
-        Log.i("fdsd", "onCreate: HAT!!!");
-
         // If this activity was started with an intent without an app widget ID, finish with an error.
         if (mAppWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
             finish();
             return;
         }
 
-//        mRecepieListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-////                AppWidget.sendRefreshBroadcast(mContext);
-//                for (int i = 0; i < recepieIngredients[position].length(); i++) {
-//                    System.out.println("Bubó" + recepieIngredients[position]);
-//                }
-//                Intent resultValue = new Intent();
-//                resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
-//                resultValue.putExtra(EXTRA_APPWIDGET_INGREDIENTS, recepieIngredients[position].toString());
-//                setResult(RESULT_OK, resultValue);
-//                finish();
-//            }
-//        });
+        mRecepieListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+
+                // this intent is essential to show the widget
+                // if this intent is not included,you can't show
+                // widget on homescreen
+                Intent intent = new Intent();
+                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
+                setResult(Activity.RESULT_OK, intent);
+
+                // start your service
+                // to fetch data
+//                Intent serviceIntent = new Intent(mContext, WidgetRemoteViewsService.class);
+//                serviceIntent
+//                        .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
+//                startService(serviceIntent);
+
+                // finish this activity
+                finish();
+
+            }
+        });
 
     }
 }

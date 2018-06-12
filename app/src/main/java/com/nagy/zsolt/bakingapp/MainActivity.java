@@ -1,8 +1,11 @@
 package com.nagy.zsolt.bakingapp;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,9 +18,12 @@ import android.widget.TextView;
 import com.nagy.zsolt.bakingapp.api.FetchDataListener;
 import com.nagy.zsolt.bakingapp.api.GETAPIRequest;
 import com.nagy.zsolt.bakingapp.api.RequestQueueService;
+import com.nagy.zsolt.bakingapp.data.RecepieContract;
+import com.nagy.zsolt.bakingapp.data.RecepieDBHelper;
 import com.nagy.zsolt.bakingapp.util.RecepieAdapter;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import butterknife.BindView;
@@ -25,8 +31,9 @@ import butterknife.BindView;
 public class MainActivity extends AppCompatActivity {
 
     JSONArray recepiesJsonArray;
-    public static String[] recepieNames, recepieSteps, recepieIngredients;
+    public static String[] recepieNames, recepieSteps, recepieIngredients, ingredients, quantities, measure;
     ListView mRecepieListView;
+    Context mContext;
 
     public static final String SHARED_PREF_NAME = "RECEPIE";
     public static final String RECEPIE_JSON_ARRAY = "RECEPIE_JSON_ARRAY";
@@ -36,7 +43,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mContext = getApplicationContext();
+
         mRecepieListView = (ListView) findViewById(R.id.recepieList);
+
+        RecepieDBHelper dbHelper = new RecepieDBHelper(mContext);
+
+        dbHelper.getWritableDatabase();
 
         getRecepies();
     }
@@ -74,9 +87,10 @@ public class MainActivity extends AppCompatActivity {
                         recepieNames[i] = obj.optString(getString(R.string.recepieName));
                         recepieSteps[i] = obj.optString(getString(R.string.steps));
                         recepieIngredients[i] = obj.optString(getString(R.string.ingredients));
+                        System.out.println("Vakanu" + recepieIngredients[i]);
                     }
 
-                    RecepieAdapter recepieAdapter = new RecepieAdapter(getApplicationContext(), recepieNames);
+                    RecepieAdapter recepieAdapter = new RecepieAdapter(mContext, recepieNames);
                     mRecepieListView.setAdapter(recepieAdapter);
                     mRecepieListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
@@ -85,14 +99,46 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
 
-                    saveToSharedPref(getApplicationContext(), data);
+                    for (int m = 0; m < recepieNames.length; m++) {
+                        JSONArray ingredientsJSONArray = null;
+                        try {
+                            ingredientsJSONArray = new JSONArray(recepieIngredients[m]);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        ingredients = new String[ingredientsJSONArray.length()];
+                        quantities = new String[ingredientsJSONArray.length()];
+                        measure = new String[ingredientsJSONArray.length()];
+
+                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+                        if (!prefs.getBoolean("firstTime", false)) {
+                            for (int i = 0; i < ingredientsJSONArray.length(); i++) {
+                                ingredients[i] = ingredientsJSONArray.optJSONObject(i).optString("ingredient");
+                                quantities[i] = ingredientsJSONArray.optJSONObject(i).optString("quantity");
+                                measure[i] = ingredientsJSONArray.optJSONObject(i).optString("measure");
+                                System.out.println("Recepie Name: " + recepieNames[m] + "\nIngredient" + ingredients[i] + "\nQuantity" + quantities[i] + "\nMeasure" + measure[i]);
+
+
+                                saveToIngredientsToDB(recepieNames[m], ingredients[i], quantities[i], measure[i]);
+                            }
+                        }
+
+                        // mark first time has runned.
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putBoolean("firstTime", true);
+                        editor.commit();
+
+
+                    }
+                    saveToSharedPref(mContext, data);
 
                 } else {
-                    RequestQueueService.showAlert(getString(R.string.noDataAlert), (FragmentActivity) getApplicationContext());
+                    RequestQueueService.showAlert(getString(R.string.noDataAlert), (FragmentActivity) mContext);
                 }
             } catch (
                     Exception e) {
-                RequestQueueService.showAlert(getString(R.string.exceptionAlert), (FragmentActivity) getApplicationContext());
+                RequestQueueService.showAlert(getString(R.string.exceptionAlert), (FragmentActivity) mContext);
                 e.printStackTrace();
             }
 
@@ -102,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
         public void onFetchFailure(String msg) {
             RequestQueueService.cancelProgressDialog();
             //Show if any error message is there called from GETAPIRequest class
-            RequestQueueService.showAlert(msg, (FragmentActivity) getApplicationContext());
+            RequestQueueService.showAlert(msg, (FragmentActivity) mContext);
         }
 
         @Override
@@ -113,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private void showRecepieDetails(int position) {
-        Intent intent = new Intent(getApplicationContext(), DetailActivity.class);
+        Intent intent = new Intent(mContext, DetailActivity.class);
         intent.putExtra(DetailActivity.EXTRA_POSITION, position);
         intent.putExtra(DetailActivity.INGREDIENTS_JSONARRAY, recepieIngredients[position].toString());
         intent.putExtra(DetailActivity.STEPS_JSONARRAY, recepieSteps[position].toString());
@@ -121,8 +167,8 @@ public class MainActivity extends AppCompatActivity {
 //        getActivity().overridePendingTransition(R.anim.slide_from_right, R.anim.fade_out);
     }
 
-    public static void saveToSharedPref(Context mContext, JSONArray data){
-        SharedPreferences mPrefs = mContext.getSharedPreferences(SHARED_PREF_NAME,Context.MODE_PRIVATE);
+    public static void saveToSharedPref(Context mContext, JSONArray data) {
+        SharedPreferences mPrefs = mContext.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor prefsEditor = mPrefs.edit();
         prefsEditor.putString(RECEPIE_JSON_ARRAY, data.toString());
         prefsEditor.commit();
@@ -132,7 +178,25 @@ public class MainActivity extends AppCompatActivity {
         return recepieSteps[position];
     }
 
-    public static String[] getRecepieNames() {
-        return recepieNames;
+    public void saveToIngredientsToDB(final String recepieName, final String recepieIngredient, final String recepieQuantity, final String recepieMeasure) {
+
+
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                //ContentValues instance to pass the values onto the insert query
+                ContentValues cv = new ContentValues();
+                cv.put(RecepieContract.IngredientEntry.COLUMN_RECEPIE_NAME, recepieName);
+                cv.put(RecepieContract.IngredientEntry.COLUMN_INGREDIENT, recepieIngredient);
+                cv.put(RecepieContract.IngredientEntry.COLUMN_RECEPIE_QUANTITY, recepieQuantity);
+                cv.put(RecepieContract.IngredientEntry.COLUMN_MEASURE, recepieMeasure);
+
+                mContext.getContentResolver().insert(
+                        RecepieContract.IngredientEntry.CONTENT_URI,
+                        cv);
+                return null;
+            }
+        }.executeOnExecutor(android.os.AsyncTask.THREAD_POOL_EXECUTOR);
     }
 }

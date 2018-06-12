@@ -1,0 +1,139 @@
+package com.nagy.zsolt.bakingapp.data;
+
+import android.content.ContentProvider;
+import android.content.ContentValues;
+import android.content.UriMatcher;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteQueryBuilder;
+import android.net.Uri;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
+public class RecepieProvider extends ContentProvider {
+
+    public static final int CODE_RECEPIE = 100;
+    public static final int CODE_INGREDIENTS = 101;
+
+    private static final UriMatcher sUriMatcher = buildUriMatcher();
+    private RecepieDBHelper mOpenHelper;
+
+    public static UriMatcher buildUriMatcher() {
+
+        final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
+        final String authority = RecepieContract.CONTENT_AUTHORITY;
+
+        matcher.addURI(authority, RecepieContract.PATH_RECEPIES, CODE_RECEPIE);
+        matcher.addURI(authority, RecepieContract.PATH_INGREDIENTS, CODE_INGREDIENTS);
+
+        return matcher;
+    }
+
+    @Override
+    public boolean onCreate() {
+        mOpenHelper = new RecepieDBHelper(getContext());
+        return true;
+    }
+
+    @Nullable
+    @Override
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+        Cursor cursor = null;
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case CODE_RECEPIE:
+                queryBuilder.setTables(RecepieContract.RecepieEntry.TABLE_NAME);
+                break;
+            case CODE_INGREDIENTS:
+                queryBuilder.setTables(RecepieContract.IngredientEntry.TABLE_NAME);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown URI");
+        }
+
+        cursor = queryBuilder.query(mOpenHelper.getReadableDatabase(), projection, selection, selectionArgs, null, null, sortOrder);
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
+        return cursor;
+    }
+
+    @Nullable
+    @Override
+    public String getType(@NonNull Uri uri) {
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public Uri insert(@NonNull Uri uri, @Nullable ContentValues contentValues) {
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final int match = sUriMatcher.match(uri);
+        Uri returnUri;
+        switch (match) {
+            case CODE_RECEPIE: {
+                long id = db.insert(RecepieContract.RecepieEntry.TABLE_NAME, null, contentValues);
+                if (id > 0) {
+                    returnUri = RecepieContract.RecepieEntry.buildRecepieUri(id);
+                } else {
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                }
+                break;
+
+            }
+            case CODE_INGREDIENTS: {
+                long id = db.insert(RecepieContract.IngredientEntry.TABLE_NAME, null, contentValues);
+                if (id > 0) {
+                    returnUri = RecepieContract.IngredientEntry.buildRecepieUri(id);
+                } else {
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                }
+                break;
+
+            }
+
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+        if (getContext() != null) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return returnUri;
+
+
+    }
+
+
+    @Override
+    public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] strings) {
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final int match = sUriMatcher.match(uri);
+        int rowsDeleted;
+
+        if (null == selection) {
+            selection = "1";
+        }
+        switch (match) {
+            case CODE_RECEPIE:
+                rowsDeleted = db.delete(
+                        RecepieContract.RecepieEntry.TABLE_NAME, selection, strings);
+                break;
+            case CODE_INGREDIENTS:
+                rowsDeleted = db.delete(
+                        RecepieContract.IngredientEntry.TABLE_NAME, selection, strings);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+
+        if (rowsDeleted != 0 && getContext() != null) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return rowsDeleted;
+    }
+
+    @Override
+    public int update(@NonNull Uri uri, @Nullable ContentValues contentValues, @Nullable String s, @Nullable String[] strings) {
+        return 0;
+    }
+}
+
