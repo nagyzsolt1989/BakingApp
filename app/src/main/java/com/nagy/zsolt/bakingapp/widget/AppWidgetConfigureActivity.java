@@ -32,7 +32,7 @@ public class AppWidgetConfigureActivity extends AppCompatActivity {
     public static final String RECEPIE_JSON_ARRAY = "RECEPIE_JSON_ARRAY";
     public int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
     JSONArray recepiesJsonArray;
-    String[] recepieNames, recepieIngredients;
+    public String[] recepieNames, recepieIngredients;
     ListView mRecepieListView;
     Context mContext;
 
@@ -93,11 +93,9 @@ public class AppWidgetConfigureActivity extends AppCompatActivity {
                 setResult(Activity.RESULT_OK, intent);
 
                 // start your service
-                // to fetch data
-//                Intent serviceIntent = new Intent(mContext, WidgetRemoteViewsService.class);
-//                serviceIntent
-//                        .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
-//                startService(serviceIntent);
+                System.out.println("position" + position);
+                System.out.println("RecepieName" + recepieNames[position]);
+                AppWidget.setWidgetData(getApplicationContext(), position, recepieNames[position]);
 
                 // finish this activity
                 finish();

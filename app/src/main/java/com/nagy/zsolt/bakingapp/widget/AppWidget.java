@@ -54,6 +54,15 @@ public class AppWidget extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         updateAppWidget(context, appWidgetManager, appWidgetIds, -1, null);
+        for (int appWidgetId : appWidgetIds) {
+            RemoteViews views = new RemoteViews(
+                    context.getPackageName(),
+                    R.layout.app_widget
+            );
+            Intent intent = new Intent(context, WidgetRemoteViewsService.class);
+            views.setRemoteAdapter(R.id.widget_listview, intent);
+            appWidgetManager.updateAppWidget(appWidgetId, views);
+        }
     }
 }
 
