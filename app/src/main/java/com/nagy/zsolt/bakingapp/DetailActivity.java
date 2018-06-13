@@ -68,9 +68,6 @@ public class DetailActivity extends AppCompatActivity implements RecepieStepList
             recepieStepTitle[i] = stepJSONArray.optJSONObject(i).optString("shortDescription");
             recepieStepDescription[i] = stepJSONArray.optJSONObject(i).optString("description");
             recepieStepVideoURI[i] = stepJSONArray.optJSONObject(i).optString("videoURL");
-            System.out.println("Hulk" + recepieStepTitle[i]);
-            System.out.println("Smash" + recepieStepDescription[i]);
-            System.out.println("Loki" + recepieStepVideoURI[i]);
         }
 
         if (findViewById(R.id.recepie_step_details_linear_layout) != null) {
@@ -97,6 +94,18 @@ public class DetailActivity extends AppCompatActivity implements RecepieStepList
             }
         } else {
             mTwoPane = false;
+
+            FragmentManager fragmentManager = getSupportFragmentManager();
+
+            Bundle bundle = new Bundle();
+            bundle.putInt("Position", position);
+
+            RecepieStepListFragment recepieStepListFragment = new RecepieStepListFragment();
+            recepieStepListFragment.setArguments(bundle);
+            fragmentManager.beginTransaction()
+                    .add(R.id.step_list_container, recepieStepListFragment)
+                    .commit();
+
         }
     }
 
@@ -127,8 +136,13 @@ public class DetailActivity extends AppCompatActivity implements RecepieStepList
             } else {
                 // separate activities
                 // launch detail activity using intent
+                Bundle bundle = new Bundle();
+                bundle.putStringArray("StepTitle", recepieStepTitle);
+                bundle.putStringArray("StepDescription", recepieStepDescription);
+                bundle.putStringArray("StepVideoURI", recepieStepVideoURI);
+                bundle.putInt("StepPosition", stepPosition-1);
                 Intent i = new Intent(getApplicationContext(), RecepieStepActivity.class);
-                i.putExtra("item", stepPosition);
+                i.putExtras(bundle);
                 startActivity(i);
             }
         }

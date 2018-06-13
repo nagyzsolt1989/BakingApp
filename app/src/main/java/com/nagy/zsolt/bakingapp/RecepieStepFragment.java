@@ -62,9 +62,6 @@ public class RecepieStepFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.content_recepie_detail, container, false);
 
-        System.out.println("Steve" + recepieStepTitle);
-        System.out.println("Rogers" + recepieStepDescription);
-
         mPlayerView = (SimpleExoPlayerView) rootView.findViewById(R.id.playerView);
 
         final TextView recepieStepTitleTV = (TextView) rootView.findViewById(R.id.recepieStepTitle);

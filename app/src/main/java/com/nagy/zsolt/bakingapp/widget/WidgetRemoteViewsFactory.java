@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.Binder;
 import android.util.Log;
@@ -33,11 +34,12 @@ public class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsF
 
     private Context mContext;
     private Cursor mCursor;
+    int recipeId;
 
     public WidgetRemoteViewsFactory(Context context, Intent intent) {
         mContext = context;
         if (intent.getData() != null) {
-//            recipeId = Integer.valueOf(intent.getData().getSchemeSpecificPart());
+            recipeId = Integer.valueOf(intent.getData().getSchemeSpecificPart());
         }
     }
 
@@ -62,6 +64,9 @@ public class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsF
                 null,
                 null
         );
+
+        System.out.println("Viewsfactory: " + DatabaseUtils.dumpCursorToString(mCursor));
+
 
         Binder.restoreCallingIdentity(identityToken);
     }
@@ -111,10 +116,7 @@ public class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsF
 
     @Override
     public long getItemId(int position) {
-        if (mCursor.moveToPosition(position)) {
-            return mCursor.getInt(0);
-        }
-        return position;
+        return mCursor.moveToPosition(position) ? mCursor.getLong(0) : position;
     }
 
     @Override

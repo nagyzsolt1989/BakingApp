@@ -6,13 +6,10 @@
     android:layout_height="match_parent"
     android:background="@android:color/darker_gray">
 
-    <ListView
-        android:id="@+id/recepieStepList"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="0dp"
-        android:footerDividersEnabled="false"
-        android:headerDividersEnabled="false"/>
+    <FrameLayout
+        android:id="@+id/step_list_container"
+        android:name="com.nagy.zsolt.bakingapp.MasterListFragment"
+        android:layout_width="400dp"
+        android:layout_height="match_parent"/>
 
 </LinearLayout>

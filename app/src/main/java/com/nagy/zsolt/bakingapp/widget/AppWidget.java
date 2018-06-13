@@ -48,21 +48,22 @@ public class AppWidget extends AppWidgetProvider {
                 AppWidget.class));
 
         updateAppWidget(context, appWidgetManager, appWidgetIds, recipeId, recipeName);
+        System.out.println("setWidgetData: " + recipeId +" " + recipeName);
         appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview);
     }
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         updateAppWidget(context, appWidgetManager, appWidgetIds, -1, null);
-        for (int appWidgetId : appWidgetIds) {
-            RemoteViews views = new RemoteViews(
-                    context.getPackageName(),
-                    R.layout.app_widget
-            );
-            Intent intent = new Intent(context, WidgetRemoteViewsService.class);
-            views.setRemoteAdapter(R.id.widget_listview, intent);
-            appWidgetManager.updateAppWidget(appWidgetId, views);
-        }
+//        for (int appWidgetId : appWidgetIds) {
+//            RemoteViews views = new RemoteViews(
+//                    context.getPackageName(),
+//                    R.layout.app_widget
+//            );
+//            Intent intent = new Intent(context, WidgetRemoteViewsService.class);
+//            views.setRemoteAdapter(R.id.widget_listview, intent);
+//            appWidgetManager.updateAppWidget(appWidgetId, views);
+//        }
     }
 }
 
