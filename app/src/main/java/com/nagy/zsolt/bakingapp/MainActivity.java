@@ -28,6 +28,9 @@ import org.json.JSONObject;
 
 import butterknife.BindView;
 
+import static com.nagy.zsolt.bakingapp.data.Constants.Keys.RECEPIE_JSON_ARRAY;
+import static com.nagy.zsolt.bakingapp.data.Constants.Keys.SHARED_PREF_NAME;
+
 public class MainActivity extends AppCompatActivity {
 
     JSONArray recepiesJsonArray;
@@ -35,8 +38,7 @@ public class MainActivity extends AppCompatActivity {
     ListView mRecepieListView;
     Context mContext;
 
-    public static final String SHARED_PREF_NAME = "RECEPIE";
-    public static final String RECEPIE_JSON_ARRAY = "RECEPIE_JSON_ARRAY";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

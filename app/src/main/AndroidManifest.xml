@@ -35,7 +35,6 @@
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
             </intent-filter>
-
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/app_widget_info"/>
@@ -47,8 +46,9 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".widget.WidgetRemoteViewsService"
-                 android:permission="android.permission.BIND_REMOTEVIEWS"></service>
+        <service android:name="com.nagy.zsolt.bakingapp.widget.WidgetRemoteViewsService"
+                 android:exported="false"
+                 android:permission="android.permission.BIND_REMOTEVIEWS"/>
 
         <!--ContentProvider-->
         <provider

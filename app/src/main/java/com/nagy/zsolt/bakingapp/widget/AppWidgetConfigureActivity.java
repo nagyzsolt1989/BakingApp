@@ -2,16 +2,21 @@ package com.nagy.zsolt.bakingapp.widget;
 
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProviderInfo;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.RemoteViews;
 
 import com.nagy.zsolt.bakingapp.MainActivity;
 import com.nagy.zsolt.bakingapp.R;
@@ -22,6 +27,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import static android.app.PendingIntent.getActivity;
+import static android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_ID;
+import static android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID;
 
 /**
  * The configuration screen for the {@link AppWidget AppWidget} AppWidget.
@@ -46,8 +53,9 @@ public class AppWidgetConfigureActivity extends AppCompatActivity {
 
         setContentView(R.layout.app_widget_configure);
 
+        mContext = getApplicationContext();
 
-        SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        final SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
         try {
             recepiesJsonArray = new JSONArray(sharedPref.getString(RECEPIE_JSON_ARRAY, ""));
         } catch (JSONException e) {
@@ -85,20 +93,67 @@ public class AppWidgetConfigureActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
 
-                // this intent is essential to show the widget
-                // if this intent is not included,you can't show
-                // widget on homescreen
-                Intent intent = new Intent();
-                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
-                setResult(Activity.RESULT_OK, intent);
+                SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+                SharedPreferences.Editor prefsEditor = mPrefs.edit();
 
-                // start your service
-                System.out.println("position" + position);
-                System.out.println("RecepieName" + recepieNames[position]);
-                AppWidget.setWidgetData(getApplicationContext(), position, recepieNames[position]);
+                if (getIntent().hasExtra(AppWidgetManager.EXTRA_APPWIDGET_ID)) {
+                    mAppWidgetId = getIntent().getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, INVALID_APPWIDGET_ID);
 
-                // finish this activity
-                finish();
+                    prefsEditor.putString("widget", recepieNames[position]);
+                    prefsEditor.commit();
+
+                    AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(AppWidgetConfigureActivity.this);
+
+                    Intent intent = new Intent(AppWidgetConfigureActivity.this, AppWidget.class);
+                    intent.setAction("android.appwidget.action.APPWIDGET_UPDATE");
+                    int ids[] = AppWidgetManager.getInstance(
+                            getApplication()).getAppWidgetIds(new ComponentName(getApplication(), AppWidget.class));
+                    for (int i = 0; i < ids.length; i++) {
+                        System.out.println("Ids " + ids[i]);
+                    }
+                    intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+
+                    AppWidgetConfigureActivity.this.sendBroadcast(intent);
+
+                    System.out.println("IDE LÉPTÜNK BE" + ids);
+                    int appWidgetIds[] = appWidgetManager.getAppWidgetIds(
+                            new ComponentName(AppWidgetConfigureActivity.this, AppWidget.class));
+                    for (int i = 0; i < appWidgetIds.length; i++) {
+                        System.out.println("appWidgetIds " + appWidgetIds[i]);
+                    }
+                    appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview);
+
+                    finish();
+                } else {
+                    mAppWidgetId = INVALID_APPWIDGET_ID;
+                    Intent intent = getIntent();
+                    Bundle extras = intent.getExtras();
+                    if (extras != null) {
+                        mAppWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID,
+                                INVALID_APPWIDGET_ID);
+
+                        AppWidgetProviderInfo providerInfo = AppWidgetManager.getInstance(
+                                getBaseContext()).getAppWidgetInfo(mAppWidgetId);
+                        String appWidgetLabel = providerInfo.label;
+
+                        prefsEditor.putString("widget", recepieNames[position]);
+                        prefsEditor.commit();
+
+                        Intent startService = new Intent(AppWidgetConfigureActivity.this,
+                                WidgetRemoteViewsService.class);
+                        System.out.println("EXTRA_APPWIDGET_ID" + mAppWidgetId);
+                        startService.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
+                        startService.setAction("FROM CONFIGURATION ACTIVITY");
+                        setResult(RESULT_OK, startService);
+                        startService(startService);
+
+                        finish();
+                    }
+                    if (mAppWidgetId == INVALID_APPWIDGET_ID) {
+                        Log.i(AppWidgetConfigureActivity.class.getSimpleName(), "Invalid app widget ID");
+                        finish();
+                    }
+                }
 
             }
         });

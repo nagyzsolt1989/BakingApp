@@ -1,21 +1,16 @@
 package com.nagy.zsolt.bakingapp.widget;
 
-import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.Bundle;
-import android.util.Log;
 import android.widget.RemoteViews;
 
-import com.nagy.zsolt.bakingapp.MainActivity;
 import com.nagy.zsolt.bakingapp.R;
-import com.nagy.zsolt.bakingapp.util.IngredientsAdapter;
-
-import static com.android.volley.VolleyLog.TAG;
+import static com.nagy.zsolt.bakingapp.data.Constants.Keys.SHARED_PREF_NAME;
 
 /**
  * Implementation of App Widget functionality.
@@ -23,47 +18,63 @@ import static com.android.volley.VolleyLog.TAG;
  */
 public class AppWidget extends AppWidgetProvider {
 
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-                                int[] appWidgetIds, int recipeId, String recipeName) {
-        Intent intent;
-        PendingIntent pendingIntent;
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.app_widget);
-
-        for (int appWidgetId : appWidgetIds) {
-            if (recipeId >= 0 && recipeName != null) {
-                Bundle args = new Bundle();
-
-                Intent service = new Intent(context, WidgetRemoteViewsService.class);
-                service.setData(Uri.fromParts("content", String.valueOf(recipeId), null));
-                views.setRemoteAdapter(R.id.widget_listview, service);
-            }
-
-            appWidgetManager.updateAppWidget(appWidgetId, views);
-        }
-    }
-
-    public static void setWidgetData(Context context, int recipeId, String recipeName) {
-        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(context,
-                AppWidget.class));
-
-        updateAppWidget(context, appWidgetManager, appWidgetIds, recipeId, recipeName);
-        System.out.println("setWidgetData: " + recipeId +" " + recipeName);
-        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview);
-    }
+    SharedPreferences mPrefs;
+    int randomNumber;
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        updateAppWidget(context, appWidgetManager, appWidgetIds, -1, null);
-//        for (int appWidgetId : appWidgetIds) {
-//            RemoteViews views = new RemoteViews(
-//                    context.getPackageName(),
-//                    R.layout.app_widget
-//            );
-//            Intent intent = new Intent(context, WidgetRemoteViewsService.class);
-//            views.setRemoteAdapter(R.id.widget_listview, intent);
-//            appWidgetManager.updateAppWidget(appWidgetId, views);
-//        }
+        for (int widgetId : appWidgetIds) {
+
+            System.out.println("onUpdate-be léptünk");
+            Intent intent = new Intent(context, WidgetRemoteViewsService.class);
+
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
+            intent.putExtra("random", randomNumber);
+            randomNumber++;
+            intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
+
+            RemoteViews widget = new RemoteViews(context.getPackageName(), R.layout.app_widget);
+
+            System.out.println("setRemoteAdapter előtt");
+            widget.setRemoteAdapter(R.id.widget_listview, intent);
+            System.out.println("setRemoteAdapter után");
+
+            appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview);
+
+
+            // At the time of widget creation when this method is called, mPrefs does not have the
+            // recipe data for the widget so we need to set the recipe data in the WidgetService
+            // class to display the recipe correctly for the FIRST time.  When the user launches the
+            // config activity to change the recipe, we can use this block of code to UPDATE the
+            // recipe information for an EXISTING widget.
+            mPrefs = context.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+            String recipeName = mPrefs.getString("widget", "recepie was not in shared preferences");
+            if (recipeName != null){
+
+                widget.setTextViewText(R.id.appwidget_text, recipeName);
+            }
+            System.out.println("appWidgetManager.updateAppWidget előtt");
+            appWidgetManager.updateAppWidget(widgetId, widget);
+            System.out.println("appWidgetManager.updateAppWidget után");
+        }
+        System.out.println("super.onUpdate előtt");
+        super.onUpdate(context, appWidgetManager, appWidgetIds);
+        System.out.println("super.onUpdate után");
+    }
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        final String action = intent.getAction();
+        if (action.equals(AppWidgetManager.ACTION_APPWIDGET_UPDATE)) {
+            AppWidgetManager manager = AppWidgetManager.getInstance(context);
+            ComponentName componentName = new ComponentName(context, AppWidget.class);
+            int ids[] =manager.getAppWidgetIds(componentName);
+            for (int i = 0; i <ids.length; i++) {
+                System.out.println("onReceive-be léptünk" + ids[i]);
+            }
+            manager.notifyAppWidgetViewDataChanged(manager.getAppWidgetIds(componentName), R.id.widget_listview);
+        }
+        super.onReceive(context, intent);
     }
 }
 
