@@ -19,16 +19,19 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".DetailActivity">
+        <activity android:name=".DetailActivity"
+                  android:configChanges="orientation|screenSize|layoutDirection">
         </activity>
         <activity android:name=".IngredientsActivity">
         </activity>
-        <activity android:name=".RecepieStepActivity">
+        <activity android:name=".RecepieStepActivity"
+                  android:configChanges="orientation|screenSize|layoutDirection">
         </activity>
         <activity
             android:name=".RecepieDetailActivity"
             android:label="@string/title_activity_recepie_detail"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:configChanges="orientation|screenSize|layoutDirection">
         </activity>
 
         <receiver android:name=".widget.AppWidget">

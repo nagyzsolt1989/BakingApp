@@ -92,15 +92,6 @@ public class MainActivity extends AppCompatActivity {
                         System.out.println("Vakanu" + recepieIngredients[i]);
                     }
 
-                    RecepieAdapter recepieAdapter = new RecepieAdapter(mContext, recepieNames);
-                    mRecepieListView.setAdapter(recepieAdapter);
-                    mRecepieListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                            showRecepieDetails(position);
-                        }
-                    });
-
                     for (int m = 0; m < recepieNames.length; m++) {
                         JSONArray ingredientsJSONArray = null;
                         try {
@@ -113,27 +104,42 @@ public class MainActivity extends AppCompatActivity {
                         quantities = new String[ingredientsJSONArray.length()];
                         measure = new String[ingredientsJSONArray.length()];
 
+                        StringBuilder result = new StringBuilder();
                         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-                        if (!prefs.getBoolean("firstTime", false)) {
-                            for (int i = 0; i < ingredientsJSONArray.length(); i++) {
-                                ingredients[i] = ingredientsJSONArray.optJSONObject(i).optString("ingredient");
-                                quantities[i] = ingredientsJSONArray.optJSONObject(i).optString("quantity");
-                                measure[i] = ingredientsJSONArray.optJSONObject(i).optString("measure");
-                                System.out.println("Recepie Name: " + recepieNames[m] + "\nIngredient" + ingredients[i] + "\nQuantity" + quantities[i] + "\nMeasure" + measure[i]);
+                        SharedPreferences.Editor editor = prefs.edit();
+                        for (int i = 0; i < ingredientsJSONArray.length(); i++) {
+                            ingredients[i] = ingredientsJSONArray.optJSONObject(i).optString("ingredient");
+                            quantities[i] = ingredientsJSONArray.optJSONObject(i).optString("quantity");
+                            measure[i] = ingredientsJSONArray.optJSONObject(i).optString("measure");
+                            System.out.println("Recepie Name: " + recepieNames[m] + "\nIngredient" + ingredients[i] + "\nQuantity" + quantities[i] + "\nMeasure" + measure[i]);
 
+                            result.append(ingredients[i] + " " +quantities[i] + " " + measure[i]);
+                            result.append(System.getProperty("line.separator"));
+                            editor.putString(recepieNames[m], result.toString());
+                            editor.commit();
 
-                                saveToIngredientsToDB(recepieNames[m], ingredients[i], quantities[i], measure[i]);
-                            }
                         }
 
-                        // mark first time has runned.
-                        SharedPreferences.Editor editor = prefs.edit();
+//                        if (!prefs.getBoolean("firstTime", false)) {
+//                            saveToIngredientsToDB(recepieNames[m], ingredients[i], quantities[i], measure[i]);
+//                        }
+
+                        // mark first time has runned
                         editor.putBoolean("firstTime", true);
                         editor.commit();
 
 
                     }
                     saveToSharedPref(mContext, data);
+
+                    RecepieAdapter recepieAdapter = new RecepieAdapter(mContext, recepieNames);
+                    mRecepieListView.setAdapter(recepieAdapter);
+                    mRecepieListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                            showRecepieDetails(position);
+                        }
+                    });
 
                 } else {
                     RequestQueueService.showAlert(getString(R.string.noDataAlert), (FragmentActivity) mContext);

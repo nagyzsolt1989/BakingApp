@@ -122,7 +122,7 @@ public class AppWidgetConfigureActivity extends AppCompatActivity {
                         System.out.println("appWidgetIds " + appWidgetIds[i]);
                     }
                     appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_listview);
-
+                    setResult(RESULT_OK, intent);
                     finish();
                 } else {
                     mAppWidgetId = INVALID_APPWIDGET_ID;
@@ -139,13 +139,11 @@ public class AppWidgetConfigureActivity extends AppCompatActivity {
                         prefsEditor.putString("widget", recepieNames[position]);
                         prefsEditor.commit();
 
-                        Intent startService = new Intent(AppWidgetConfigureActivity.this,
-                                WidgetRemoteViewsService.class);
-                        System.out.println("EXTRA_APPWIDGET_ID" + mAppWidgetId);
-                        startService.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
-                        startService.setAction("FROM CONFIGURATION ACTIVITY");
-                        setResult(RESULT_OK, startService);
-                        startService(startService);
+                        Intent startWidget = new Intent(AppWidgetConfigureActivity.this,
+                                AppWidget.class);
+                        startWidget.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
+                        startWidget.setAction("FROM CONFIGURATION ACTIVITY");
+                        setResult(RESULT_OK, startWidget);
 
                         finish();
                     }

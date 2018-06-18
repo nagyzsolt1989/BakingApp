@@ -66,7 +66,7 @@ public class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsF
     @Override
     public void onDataSetChanged() {
         System.out.println("onDataSetChanged-be léptünk ");
-        recipeName = mPrefs.getString("widget", "recepie was not in shared preferences");
+        recipeName = mPrefs.getString("widget", "recepie was not in shared preferences2");
 
 
         String[] projection = {
