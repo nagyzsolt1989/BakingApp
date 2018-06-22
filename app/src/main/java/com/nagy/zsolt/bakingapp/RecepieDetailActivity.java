@@ -90,4 +90,5 @@ public class RecepieDetailActivity extends AppCompatActivity {
         Toast.makeText(this, R.string.detail_error_message, Toast.LENGTH_SHORT).show();
     }
 
+
 }

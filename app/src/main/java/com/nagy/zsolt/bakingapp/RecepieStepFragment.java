@@ -2,6 +2,8 @@ package com.nagy.zsolt.bakingapp;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.PersistableBundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,6 +13,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.LoadControl;
@@ -27,12 +30,16 @@ import com.google.android.exoplayer2.util.Util;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.nagy.zsolt.bakingapp.data.Constants.Keys.SELECTED_POSITION_KEY;
+import static com.nagy.zsolt.bakingapp.data.Constants.Keys.SELECTED_STEP_POSITION_KEY;
+
 public class RecepieStepFragment extends Fragment {
 
     String[] recepieStepTitle, recepieStepDescription, recepieStepVideo;
     int stepPosition;
     private SimpleExoPlayer mExoPlayer;
     private SimpleExoPlayerView mPlayerView;
+    private long mPlayerPosition;
     Uri uri;
 
     /**
@@ -73,7 +80,7 @@ public class RecepieStepFragment extends Fragment {
         prevBtn.setVisibility(View.GONE);
         nextBtn.setVisibility(View.GONE);
 
-        if(recepieStepTitle != null){
+        if (recepieStepTitle != null) {
             prevBtn.setVisibility(View.VISIBLE);
             nextBtn.setVisibility(View.VISIBLE);
             recepieStepTitleTV.setText(recepieStepTitle[stepPosition]);
@@ -87,7 +94,7 @@ public class RecepieStepFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 // Increment position as long as the index remains <= the size of the image ids list
-                if (stepPosition >  0) stepPosition--;
+                if (stepPosition > 0) stepPosition--;
                 // Set the image resource to the new list item
                 recepieStepTitleTV.setText(recepieStepTitle[stepPosition]);
                 recepieStepDescriptionTV.setText(recepieStepDescription[stepPosition]);
@@ -100,7 +107,7 @@ public class RecepieStepFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 // Increment position as long as the index remains <= the size of the image ids list
-                if (stepPosition <  recepieStepTitle.length-1) stepPosition++;
+                if (stepPosition < recepieStepTitle.length - 1) stepPosition++;
                 // Set the image resource to the new list item
                 recepieStepTitleTV.setText(recepieStepTitle[stepPosition]);
                 recepieStepDescriptionTV.setText(recepieStepDescription[stepPosition]);
@@ -115,20 +122,26 @@ public class RecepieStepFragment extends Fragment {
 
     /**
      * Initialize ExoPlayer.
+     *
      * @param mediaUri The URI of the sample to play.
      */
     private void initializePlayer(Uri mediaUri) {
-            // Create an instance of the ExoPlayer.
-            TrackSelector trackSelector = new DefaultTrackSelector();
-            LoadControl loadControl = new DefaultLoadControl();
-            mExoPlayer = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector, loadControl);
-            mPlayerView.setPlayer(mExoPlayer);
-            // Prepare the MediaSource.
-            String userAgent = Util.getUserAgent(getContext(), "ClassicalMusicQuiz");
-            MediaSource mediaSource = new ExtractorMediaSource(mediaUri, new DefaultDataSourceFactory(
-                    getContext(), userAgent), new DefaultExtractorsFactory(), null, null);
-            mExoPlayer.prepare(mediaSource);
-//            mExoPlayer.setPlayWhenReady(true);
+        TrackSelector trackSelector = new DefaultTrackSelector();
+        LoadControl loadControl = new DefaultLoadControl();
+        mExoPlayer = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector, loadControl);
+        mPlayerView.setPlayer(mExoPlayer);
+        // Prepare the MediaSource.
+        String userAgent = Util.getUserAgent(getContext(), "BakingApp");
+        MediaSource mediaSource = new ExtractorMediaSource(mediaUri, new DefaultDataSourceFactory(
+                getContext(), userAgent), new DefaultExtractorsFactory(), null, null);
+
+        mExoPlayer.prepare(mediaSource);
+        System.out.println("Mplayer position: " + mPlayerPosition);
+        if (mPlayerPosition != C.TIME_UNSET) {
+            System.out.println("Grofo: " + mPlayerPosition);
+            mExoPlayer.seekTo(mPlayerPosition);
+            mExoPlayer.setPlayWhenReady(true);
+        }
     }
 
 
@@ -136,7 +149,7 @@ public class RecepieStepFragment extends Fragment {
      * Release ExoPlayer.
      */
     private void releasePlayer() {
-        if (mExoPlayer != null){
+        if (mExoPlayer != null) {
             mExoPlayer.stop();
             mExoPlayer.release();
             mExoPlayer = null;
@@ -151,4 +164,44 @@ public class RecepieStepFragment extends Fragment {
         super.onDestroyView();
         releasePlayer();
     }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putLong(SELECTED_POSITION_KEY, mPlayerPosition);
+        outState.putInt(SELECTED_STEP_POSITION_KEY, stepPosition);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(SELECTED_POSITION_KEY)) {
+                mPlayerPosition = savedInstanceState.getLong(SELECTED_POSITION_KEY);
+            }
+            if (savedInstanceState.containsKey(SELECTED_STEP_POSITION_KEY)) {
+                stepPosition = savedInstanceState.getInt(SELECTED_STEP_POSITION_KEY);
+            }
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mExoPlayer != null) {
+            mExoPlayer.stop();
+            mExoPlayer.release();
+            mExoPlayer = null;
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (uri != null) {
+            initializePlayer(uri);
+        }
+    }
+
+
 }
