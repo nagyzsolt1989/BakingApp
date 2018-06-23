@@ -26,6 +26,7 @@ import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,11 +36,13 @@ import static com.nagy.zsolt.bakingapp.data.Constants.Keys.SELECTED_STEP_POSITIO
 
 public class RecepieStepFragment extends Fragment {
 
-    String[] recepieStepTitle, recepieStepDescription, recepieStepVideo;
+    String[] recepieStepTitle, recepieStepDescription, recepieStepVideo, recepieStepThumbNail;
     int stepPosition;
     private SimpleExoPlayer mExoPlayer;
     private SimpleExoPlayerView mPlayerView;
     private long mPlayerPosition;
+    private boolean getPlayerWhenReady;
+    ImageView mImageView;
     Uri uri;
 
     /**
@@ -51,12 +54,14 @@ public class RecepieStepFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         if (getArguments() != null) {
             recepieStepTitle = getArguments().getStringArray("StepTitle");
             recepieStepDescription = getArguments().getStringArray("StepDescription");
             recepieStepVideo = getArguments().getStringArray("StepVideoURI");
+            recepieStepThumbNail = getArguments().getStringArray("StepThumbNail");
             stepPosition = getArguments().getInt("StepPosition");
-
         }
     }
 
@@ -70,6 +75,7 @@ public class RecepieStepFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.content_recepie_detail, container, false);
 
         mPlayerView = (SimpleExoPlayerView) rootView.findViewById(R.id.playerView);
+        mImageView = rootView.findViewById(R.id.iv_recipe_video_thumbnail);
 
         final TextView recepieStepTitleTV = (TextView) rootView.findViewById(R.id.recepieStepTitle);
         final TextView recepieStepDescriptionTV = (TextView) rootView.findViewById(R.id.recepieStepDescription);
@@ -111,6 +117,11 @@ public class RecepieStepFragment extends Fragment {
                 // Set the image resource to the new list item
                 recepieStepTitleTV.setText(recepieStepTitle[stepPosition]);
                 recepieStepDescriptionTV.setText(recepieStepDescription[stepPosition]);
+
+                Picasso.with(getContext())
+                        .load(recepieStepThumbNail[stepPosition])
+                        .into(mImageView);
+
                 uri = Uri.parse(recepieStepVideo[stepPosition]);
                 initializePlayer(uri);
             }
@@ -126,6 +137,7 @@ public class RecepieStepFragment extends Fragment {
      * @param mediaUri The URI of the sample to play.
      */
     private void initializePlayer(Uri mediaUri) {
+
         TrackSelector trackSelector = new DefaultTrackSelector();
         LoadControl loadControl = new DefaultLoadControl();
         mExoPlayer = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector, loadControl);
@@ -140,7 +152,7 @@ public class RecepieStepFragment extends Fragment {
         if (mPlayerPosition != C.TIME_UNSET) {
             System.out.println("Grofo: " + mPlayerPosition);
             mExoPlayer.seekTo(mPlayerPosition);
-            mExoPlayer.setPlayWhenReady(true);
+            mExoPlayer.setPlayWhenReady(getPlayerWhenReady);
         }
     }
 
@@ -150,6 +162,8 @@ public class RecepieStepFragment extends Fragment {
      */
     private void releasePlayer() {
         if (mExoPlayer != null) {
+            mPlayerPosition = mExoPlayer.getContentPosition();
+            getPlayerWhenReady = mExoPlayer.getPlayWhenReady();
             mExoPlayer.stop();
             mExoPlayer.release();
             mExoPlayer = null;
@@ -169,6 +183,7 @@ public class RecepieStepFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         outState.putLong(SELECTED_POSITION_KEY, mPlayerPosition);
         outState.putInt(SELECTED_STEP_POSITION_KEY, stepPosition);
+        outState.putBoolean("state", getPlayerWhenReady);
         super.onSaveInstanceState(outState);
     }
 
@@ -181,6 +196,9 @@ public class RecepieStepFragment extends Fragment {
             }
             if (savedInstanceState.containsKey(SELECTED_STEP_POSITION_KEY)) {
                 stepPosition = savedInstanceState.getInt(SELECTED_STEP_POSITION_KEY);
+            }
+            if (savedInstanceState.containsKey("state")) {
+                getPlayerWhenReady = savedInstanceState.getBoolean("state");
             }
         }
     }

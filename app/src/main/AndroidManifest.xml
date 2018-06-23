@@ -19,7 +19,11 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".DetailActivity">
+        <activity android:name=".DetailActivity"
+                  android:parentActivityName="com.nagy.zsolt.bakingapp.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.nagy.zsolt.bakingapp.MainActivity" />
         </activity>
         <activity android:name=".IngredientsActivity">
         </activity>

@@ -22,7 +22,7 @@ public class DetailActivity extends AppCompatActivity implements RecepieStepList
     public static final String STEPS_JSONARRAY = "steps_jsonarray";
     public static String recepieIngredients, recepieSteps;
     JSONArray stepJSONArray;
-    String[] recepieStepTitle, recepieStepDescription, recepieStepVideoURI;
+    String[] recepieStepTitle, recepieStepDescription, recepieStepVideoURI, recepieStepThumbNail;
     public static int position;
     private boolean mTwoPane;
 
@@ -32,6 +32,8 @@ public class DetailActivity extends AppCompatActivity implements RecepieStepList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
         ButterKnife.bind(this);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Intent intent = getIntent();
         if (intent == null) {
@@ -60,6 +62,7 @@ public class DetailActivity extends AppCompatActivity implements RecepieStepList
         recepieStepTitle = new String[stepJSONArray.length()];
         recepieStepDescription = new String[stepJSONArray.length()];
         recepieStepVideoURI = new String[stepJSONArray.length()];
+        recepieStepThumbNail = new String[stepJSONArray.length()];
 
         System.out.println("stespJSONarray" + stepJSONArray);
 
@@ -68,6 +71,7 @@ public class DetailActivity extends AppCompatActivity implements RecepieStepList
             recepieStepTitle[i] = stepJSONArray.optJSONObject(i).optString("shortDescription");
             recepieStepDescription[i] = stepJSONArray.optJSONObject(i).optString("description");
             recepieStepVideoURI[i] = stepJSONArray.optJSONObject(i).optString("videoURL");
+            recepieStepThumbNail[i] = stepJSONArray.optJSONObject(i).optString("thumbnailURL");
         }
 
         if (findViewById(R.id.recepie_step_details_linear_layout) != null) {
@@ -123,6 +127,7 @@ public class DetailActivity extends AppCompatActivity implements RecepieStepList
                 bundle.putStringArray("StepTitle", recepieStepTitle);
                 bundle.putStringArray("StepDescription", recepieStepDescription);
                 bundle.putStringArray("StepVideoURI", recepieStepVideoURI);
+                bundle.putStringArray("StepThumbNail", recepieStepThumbNail);
                 bundle.putInt("StepPosition", stepPosition-1);
                 RecepieStepFragment recepieStepFragment = new RecepieStepFragment();
                 recepieStepFragment.setArguments(bundle);
@@ -140,6 +145,7 @@ public class DetailActivity extends AppCompatActivity implements RecepieStepList
                 bundle.putStringArray("StepTitle", recepieStepTitle);
                 bundle.putStringArray("StepDescription", recepieStepDescription);
                 bundle.putStringArray("StepVideoURI", recepieStepVideoURI);
+                bundle.putStringArray("StepThumbNail", recepieStepThumbNail);
                 bundle.putInt("StepPosition", stepPosition-1);
                 Intent i = new Intent(getApplicationContext(), RecepieStepActivity.class);
                 i.putExtras(bundle);
