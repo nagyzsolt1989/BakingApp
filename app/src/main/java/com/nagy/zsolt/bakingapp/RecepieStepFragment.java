@@ -91,7 +91,6 @@ public class RecepieStepFragment extends Fragment {
             nextBtn.setVisibility(View.VISIBLE);
             recepieStepTitleTV.setText(recepieStepTitle[stepPosition]);
             recepieStepDescriptionTV.setText(recepieStepDescription[stepPosition]);
-            System.out.println("Ezt fogod látni " + recepieStepVideo[stepPosition]);
             uri = Uri.parse(recepieStepVideo[stepPosition]);
             initializePlayer(uri);
         }
@@ -126,8 +125,6 @@ public class RecepieStepFragment extends Fragment {
                 initializePlayer(uri);
             }
         });
-
-        // Return the rootView
         return rootView;
     }
 
@@ -206,18 +203,36 @@ public class RecepieStepFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        if (mExoPlayer != null) {
-            mExoPlayer.stop();
-            mExoPlayer.release();
-            mExoPlayer = null;
+        if (Util.SDK_INT <= 23) {
+            releasePlayer();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (Util.SDK_INT > 23) {
+            releasePlayer();
         }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (uri != null) {
-            initializePlayer(uri);
+        if ((Util.SDK_INT <= 23 || mExoPlayer == null)) {
+            if (uri != null) {
+                initializePlayer(uri);
+            }
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (Util.SDK_INT > 23) {
+            if (uri != null) {
+                initializePlayer(uri);
+            }
         }
     }
 

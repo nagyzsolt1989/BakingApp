@@ -38,6 +38,7 @@ public class RecepieStepActivity extends AppCompatActivity {
     private SimpleExoPlayer mExoPlayer;
     private SimpleExoPlayerView mPlayerView;
     private long mPlayerPosition;
+    private boolean getPlayerWhenReady;
     Uri uri;
 
     @Override
@@ -129,15 +130,10 @@ public class RecepieStepActivity extends AppCompatActivity {
                 getApplicationContext(), userAgent), new DefaultExtractorsFactory(), null, null);
 
         mExoPlayer.prepare(mediaSource);
-        System.out.println("Mplayer position: " + mPlayerPosition);
         if (mPlayerPosition != C.TIME_UNSET) {
-            System.out.println("Grofo: " + mPlayerPosition);
             mExoPlayer.seekTo(mPlayerPosition);
-            mExoPlayer.setPlayWhenReady(true);
+            mExoPlayer.setPlayWhenReady(getPlayerWhenReady);
         }
-
-
-//            mExoPlayer.setPlayWhenReady(true);
     }
 
 
@@ -147,6 +143,7 @@ public class RecepieStepActivity extends AppCompatActivity {
     private void releasePlayer() {
         if (mExoPlayer != null) {
             mPlayerPosition = mExoPlayer.getContentPosition();
+            getPlayerWhenReady = mExoPlayer.getPlayWhenReady();
             mExoPlayer.stop();
             mExoPlayer.release();
             mExoPlayer = null;
@@ -156,28 +153,36 @@ public class RecepieStepActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        releasePlayer();
+        if (Util.SDK_INT <= 23) {
+            releasePlayer();
+        }
     }
 
     @Override
-    protected void onStop() {
+    public void onStop() {
         super.onStop();
-        releasePlayer();
+        if (Util.SDK_INT > 23) {
+            releasePlayer();
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (uri != null) {
-            initializePlayer(uri);
+        if ((Util.SDK_INT <= 23 || mExoPlayer == null)) {
+            if (uri != null) {
+                initializePlayer(uri);
+            }
         }
     }
 
     @Override
-    protected void onStart() {
+    public void onStart() {
         super.onStart();
-        if (uri != null) {
-            initializePlayer(uri);
+        if (Util.SDK_INT > 23) {
+            if (uri != null) {
+                initializePlayer(uri);
+            }
         }
     }
 
@@ -190,6 +195,7 @@ public class RecepieStepActivity extends AppCompatActivity {
     public void onSaveInstanceState(Bundle outState) {
         outState.putLong(SELECTED_POSITION_KEY, mPlayerPosition);
         outState.putInt(SELECTED_STEP_POSITION_KEY, stepPosition);
+        outState.putBoolean("state", getPlayerWhenReady);
         super.onSaveInstanceState(outState);
     }
 
@@ -202,6 +208,9 @@ public class RecepieStepActivity extends AppCompatActivity {
             }
             if (savedInstanceState.containsKey(SELECTED_STEP_POSITION_KEY)) {
                 stepPosition = savedInstanceState.getInt(SELECTED_STEP_POSITION_KEY);
+            }
+            if (savedInstanceState.containsKey("state")) {
+                getPlayerWhenReady = savedInstanceState.getBoolean("state");
             }
         }
     }
