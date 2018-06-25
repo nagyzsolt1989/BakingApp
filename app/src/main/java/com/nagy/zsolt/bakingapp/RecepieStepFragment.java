@@ -37,11 +37,11 @@ import static com.nagy.zsolt.bakingapp.data.Constants.Keys.SELECTED_STEP_POSITIO
 public class RecepieStepFragment extends Fragment {
 
     String[] recepieStepTitle, recepieStepDescription, recepieStepVideo, recepieStepThumbNail;
-    int stepPosition;
+    private int stepPosition, mPlaystate, mPlayerWindow;
     private SimpleExoPlayer mExoPlayer;
     private SimpleExoPlayerView mPlayerView;
     private long mPlayerPosition;
-    private boolean getPlayerWhenReady;
+    private boolean mPlayerWhenReady;
     ImageView mImageView;
     Uri uri;
 
@@ -63,6 +63,14 @@ public class RecepieStepFragment extends Fragment {
             recepieStepThumbNail = getArguments().getStringArray("StepThumbNail");
             stepPosition = getArguments().getInt("StepPosition");
         }
+
+        if (savedInstanceState != null) {
+            mPlayerPosition = savedInstanceState.getLong(SELECTED_POSITION_KEY);
+            stepPosition = savedInstanceState.getInt(SELECTED_STEP_POSITION_KEY);
+            mPlayerWhenReady = savedInstanceState.getBoolean("state");
+            mPlayerWindow = savedInstanceState.getInt("window");
+        }
+
     }
 
     /**
@@ -92,7 +100,6 @@ public class RecepieStepFragment extends Fragment {
             recepieStepTitleTV.setText(recepieStepTitle[stepPosition]);
             recepieStepDescriptionTV.setText(recepieStepDescription[stepPosition]);
             uri = Uri.parse(recepieStepVideo[stepPosition]);
-            initializePlayer(uri);
         }
 
         prevBtn.setOnClickListener(new View.OnClickListener() {
@@ -104,7 +111,6 @@ public class RecepieStepFragment extends Fragment {
                 recepieStepTitleTV.setText(recepieStepTitle[stepPosition]);
                 recepieStepDescriptionTV.setText(recepieStepDescription[stepPosition]);
                 uri = Uri.parse(recepieStepVideo[stepPosition]);
-                initializePlayer(uri);
             }
         });
 
@@ -122,7 +128,6 @@ public class RecepieStepFragment extends Fragment {
                         .into(mImageView);
 
                 uri = Uri.parse(recepieStepVideo[stepPosition]);
-                initializePlayer(uri);
             }
         });
         return rootView;
@@ -144,13 +149,13 @@ public class RecepieStepFragment extends Fragment {
         MediaSource mediaSource = new ExtractorMediaSource(mediaUri, new DefaultDataSourceFactory(
                 getContext(), userAgent), new DefaultExtractorsFactory(), null, null);
 
-        mExoPlayer.prepare(mediaSource);
-        System.out.println("Mplayer position: " + mPlayerPosition);
         if (mPlayerPosition != C.TIME_UNSET) {
-            System.out.println("Grofo: " + mPlayerPosition);
             mExoPlayer.seekTo(mPlayerPosition);
-            mExoPlayer.setPlayWhenReady(getPlayerWhenReady);
+//            mExoPlayer.setPlaybackState(mPlaystate);
+            mExoPlayer.setPlayWhenReady(mPlayerWhenReady);
         }
+
+        mExoPlayer.prepare(mediaSource, false, false);
     }
 
 
@@ -160,7 +165,9 @@ public class RecepieStepFragment extends Fragment {
     private void releasePlayer() {
         if (mExoPlayer != null) {
             mPlayerPosition = mExoPlayer.getContentPosition();
-            getPlayerWhenReady = mExoPlayer.getPlayWhenReady();
+            mPlayerWhenReady = mExoPlayer.getPlayWhenReady();
+            mPlaystate = mExoPlayer.getPlaybackState();
+            mPlayerWindow = mExoPlayer.getCurrentWindowIndex();
             mExoPlayer.stop();
             mExoPlayer.release();
             mExoPlayer = null;
@@ -178,27 +185,36 @@ public class RecepieStepFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+        mPlayerPosition = mExoPlayer.getContentPosition();
+        mPlayerWhenReady = mExoPlayer.getPlayWhenReady();
+        mPlaystate = mExoPlayer.getPlaybackState();
+        mPlayerWindow = mExoPlayer.getCurrentWindowIndex();
         outState.putLong(SELECTED_POSITION_KEY, mPlayerPosition);
         outState.putInt(SELECTED_STEP_POSITION_KEY, stepPosition);
-        outState.putBoolean("state", getPlayerWhenReady);
+        outState.putBoolean("state", mPlayerWhenReady);
+        outState.putInt("playstate", mPlaystate);
+        outState.putInt("window", mPlayerWindow);
         super.onSaveInstanceState(outState);
     }
 
-    @Override
-    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-        if (savedInstanceState != null) {
-            if (savedInstanceState.containsKey(SELECTED_POSITION_KEY)) {
-                mPlayerPosition = savedInstanceState.getLong(SELECTED_POSITION_KEY);
-            }
-            if (savedInstanceState.containsKey(SELECTED_STEP_POSITION_KEY)) {
-                stepPosition = savedInstanceState.getInt(SELECTED_STEP_POSITION_KEY);
-            }
-            if (savedInstanceState.containsKey("state")) {
-                getPlayerWhenReady = savedInstanceState.getBoolean("state");
-            }
-        }
-    }
+//    @Override
+//    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+//        super.onViewStateRestored(savedInstanceState);
+//        if (savedInstanceState != null) {
+//            if (savedInstanceState.containsKey(SELECTED_POSITION_KEY)) {
+//                mPlayerPosition = savedInstanceState.getLong(SELECTED_POSITION_KEY);
+//            }
+//            if (savedInstanceState.containsKey(SELECTED_STEP_POSITION_KEY)) {
+//                stepPosition = savedInstanceState.getInt(SELECTED_STEP_POSITION_KEY);
+//            }
+//            if (savedInstanceState.containsKey("state")) {
+//                mPlayerWhenReady = savedInstanceState.getBoolean("state");
+//            }
+//            if (savedInstanceState.containsKey("playstate")) {
+//                mPlaystate = savedInstanceState.getInt("playstate");
+//            }
+//        }
+//    }
 
     @Override
     public void onPause() {

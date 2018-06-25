@@ -34,7 +34,7 @@ import static com.nagy.zsolt.bakingapp.data.Constants.Keys.SELECTED_STEP_POSITIO
 public class RecepieStepActivity extends AppCompatActivity {
 
     String[] recepieStepTitle, recepieStepDescription, recepieStepVideo;
-    int stepPosition;
+    int stepPosition, mPlaystate, mPlayerWindow;
     private SimpleExoPlayer mExoPlayer;
     private SimpleExoPlayerView mPlayerView;
     private long mPlayerPosition;
@@ -62,6 +62,8 @@ public class RecepieStepActivity extends AppCompatActivity {
         if (savedInstanceState != null) {
             mPlayerPosition = savedInstanceState.getLong(SELECTED_POSITION_KEY);
             stepPosition = savedInstanceState.getInt(SELECTED_STEP_POSITION_KEY);
+            getPlayerWhenReady = savedInstanceState.getBoolean("state");
+            mPlayerWindow = savedInstanceState.getInt("window");
         }
 
         mPlayerView = (SimpleExoPlayerView) findViewById(R.id.playerView_activity);
@@ -81,7 +83,6 @@ public class RecepieStepActivity extends AppCompatActivity {
             recepieStepTitleTV.setText(recepieStepTitle[stepPosition]);
             recepieStepDescriptionTV.setText(recepieStepDescription[stepPosition]);
             uri = Uri.parse(recepieStepVideo[stepPosition]);
-            initializePlayer(uri);
         }
 
         prevBtn.setOnClickListener(new View.OnClickListener() {
@@ -93,7 +94,6 @@ public class RecepieStepActivity extends AppCompatActivity {
                 recepieStepTitleTV.setText(recepieStepTitle[stepPosition]);
                 recepieStepDescriptionTV.setText(recepieStepDescription[stepPosition]);
                 uri = Uri.parse(recepieStepVideo[stepPosition]);
-                initializePlayer(uri);
             }
         });
 
@@ -106,7 +106,6 @@ public class RecepieStepActivity extends AppCompatActivity {
                 recepieStepTitleTV.setText(recepieStepTitle[stepPosition]);
                 recepieStepDescriptionTV.setText(recepieStepDescription[stepPosition]);
                 uri = Uri.parse(recepieStepVideo[stepPosition]);
-                initializePlayer(uri);
             }
         });
 
@@ -123,17 +122,22 @@ public class RecepieStepActivity extends AppCompatActivity {
         TrackSelector trackSelector = new DefaultTrackSelector();
         LoadControl loadControl = new DefaultLoadControl();
         mExoPlayer = ExoPlayerFactory.newSimpleInstance(getApplicationContext(), trackSelector, loadControl);
-        mPlayerView.setPlayer(mExoPlayer);
+
         // Prepare the MediaSource.
         String userAgent = Util.getUserAgent(getApplicationContext(), "BakingApp");
         MediaSource mediaSource = new ExtractorMediaSource(mediaUri, new DefaultDataSourceFactory(
                 getApplicationContext(), userAgent), new DefaultExtractorsFactory(), null, null);
 
-        mExoPlayer.prepare(mediaSource);
+        mExoPlayer.setPlayWhenReady(getPlayerWhenReady);
+        mPlayerView.setPlayer(mExoPlayer);
+
         if (mPlayerPosition != C.TIME_UNSET) {
-            mExoPlayer.seekTo(mPlayerPosition);
-            mExoPlayer.setPlayWhenReady(getPlayerWhenReady);
+            System.out.println("ide állítja a playert" + mPlayerPosition);
+            mExoPlayer.seekTo(mPlayerWindow, mPlayerPosition);
         }
+
+
+        mExoPlayer.prepare(mediaSource, false, false);
     }
 
 
@@ -144,6 +148,8 @@ public class RecepieStepActivity extends AppCompatActivity {
         if (mExoPlayer != null) {
             mPlayerPosition = mExoPlayer.getContentPosition();
             getPlayerWhenReady = mExoPlayer.getPlayWhenReady();
+            mPlaystate = mExoPlayer.getPlaybackState();
+            mPlayerWindow = mExoPlayer.getCurrentWindowIndex();
             mExoPlayer.stop();
             mExoPlayer.release();
             mExoPlayer = null;
@@ -193,25 +199,34 @@ public class RecepieStepActivity extends AppCompatActivity {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+        mPlayerPosition = mExoPlayer.getContentPosition();
+        getPlayerWhenReady = mExoPlayer.getPlayWhenReady();
+        mPlaystate = mExoPlayer.getPlaybackState();
+        mPlayerWindow = mExoPlayer.getCurrentWindowIndex();
         outState.putLong(SELECTED_POSITION_KEY, mPlayerPosition);
         outState.putInt(SELECTED_STEP_POSITION_KEY, stepPosition);
         outState.putBoolean("state", getPlayerWhenReady);
+        outState.putInt("playstate", mPlaystate);
+        outState.putInt("window", mPlayerWindow);
         super.onSaveInstanceState(outState);
     }
 
-    @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState, PersistableBundle persistentState) {
-        super.onRestoreInstanceState(savedInstanceState, persistentState);
-        if (savedInstanceState != null) {
-            if (savedInstanceState.containsKey(SELECTED_POSITION_KEY)) {
-                mPlayerPosition = savedInstanceState.getLong(SELECTED_POSITION_KEY);
-            }
-            if (savedInstanceState.containsKey(SELECTED_STEP_POSITION_KEY)) {
-                stepPosition = savedInstanceState.getInt(SELECTED_STEP_POSITION_KEY);
-            }
-            if (savedInstanceState.containsKey("state")) {
-                getPlayerWhenReady = savedInstanceState.getBoolean("state");
-            }
-        }
-    }
+//    @Override
+//    public void onRestoreInstanceState(Bundle savedInstanceState, PersistableBundle persistentState) {
+//        super.onRestoreInstanceState(savedInstanceState, persistentState);
+//        if (savedInstanceState != null) {
+//            if (savedInstanceState.containsKey(SELECTED_POSITION_KEY)) {
+//                mPlayerPosition = savedInstanceState.getLong(SELECTED_POSITION_KEY);
+//            }
+//            if (savedInstanceState.containsKey(SELECTED_STEP_POSITION_KEY)) {
+//                stepPosition = savedInstanceState.getInt(SELECTED_STEP_POSITION_KEY);
+//            }
+//            if (savedInstanceState.containsKey("state")) {
+//                getPlayerWhenReady = savedInstanceState.getBoolean("state");
+//            }
+//            if (savedInstanceState.containsKey("playstate")) {
+//                mPlaystate = savedInstanceState.getInt("playstate");
+//            }
+//        }
+//    }
 }
